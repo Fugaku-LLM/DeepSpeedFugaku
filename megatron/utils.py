@@ -20,8 +20,13 @@ import sys
 import torch
 from torch.nn.parallel import DistributedDataParallel as torchDDP
 
-from apex.multi_tensor_apply import multi_tensor_applier
-import amp_C
+try:
+    from apex.multi_tensor_apply import multi_tensor_applier
+    import amp_C
+    has_apex = True
+except ImportError:
+    has_apex = False
+
 
 from megatron import get_args
 from megatron import print_rank_0
@@ -64,12 +69,19 @@ def calc_params_l2_norm(model):
                     params_data.append(param.data)
     # Calculate norm
     dummy_overflow_buf = torch.cuda.IntTensor([0])
-    norm, _ = multi_tensor_applier(
-        amp_C.multi_tensor_l2norm,
-        dummy_overflow_buf,
-        [params_data],
-        False # no per-parameter norm
-    )
+    if has_apex:
+        norm, _ = multi_tensor_applier(
+            amp_C.multi_tensor_l2norm,
+            dummy_overflow_buf,
+            [params_data],
+            False # no per-parameter norm
+        )
+    else:
+        norm_type = 2.0 # l2norm
+        norm = 0.0
+        for grad in params_data:
+            grad_norm = torch.norm(grad, norm_type)
+            norm += grad_norm ** norm_type
     norm_2 = norm * norm
     # Sum across all model-parallel GPUs.
     torch.distributed.all_reduce(norm_2,

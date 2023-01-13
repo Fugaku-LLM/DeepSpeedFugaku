@@ -20,8 +20,12 @@ from abc import abstractmethod
 
 import torch
 
-from apex.multi_tensor_apply import multi_tensor_applier
-import amp_C
+try:
+    from apex.multi_tensor_apply import multi_tensor_applier
+    import amp_C
+    has_apex = True
+except ImportError:
+    has_apex = False
 
 from megatron import get_timers
 from megatron import mpu
@@ -50,13 +54,13 @@ def _multi_tensor_copy_this_to_that(this, that, overflow_buf=None):
     We don't have a blfoat16 implementation so for now if the overflow_buf
     is not provided, we default back to simple loop copy to be compatible
     with bfloat16."""
-    if overflow_buf:
+    if overflow_buf and has_apex:
         overflow_buf.fill_(0)
         # Scaling with factor `1.0` is equivalent to copy.
         multi_tensor_applier(amp_C.multi_tensor_scale,
-                             overflow_buf,
-                             [this, that],
-                             1.0)
+                            overflow_buf,
+                            [this, that],
+                            1.0)
     else:
         for this_, that_ in zip(this, that):
             that_.copy_(this_)
@@ -204,7 +208,7 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
         # Note that we keep this for the cases that grad scaler is none.
         # We still record nan/inf if we have a bfloat16 with a grad scaler.
         if self.grad_scaler:
-            self.found_inf = torch.cuda.FloatTensor([0.0])
+            self.found_inf = torch.FloatTensor([0.0])
 
         # Dummy tensor needed for apex multi-apply tensor.
         # For bfloat, we don't have multi-tensor apply and for now
@@ -212,11 +216,11 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
         if bf16:
             self._dummy_overflow_buf = None
         else:
-            self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+            self._dummy_overflow_buf = torch.IntTensor([0])
 
         # In case grad scaler is not passed, define the unity scale.
         if self.grad_scaler is None:
-            self._scale_one = torch.cuda.FloatTensor([1.0])
+            self._scale_one = torch.FloatTensor([1.0])
 
         # ======================
         # main parameter stuff
@@ -241,7 +245,9 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
 
                     # float16 params:
                     if param.type() in ['torch.cuda.HalfTensor',
-                                        'torch.cuda.BFloat16Tensor']:
+                                        'torch.cuda.BFloat16Tensor',
+                                        'torch.HalfTensor',
+                                        'torch.BFloat16Tensor']:
                         float16_params_this_group.append(param)
                         # Create a copy
                         main_param = param.detach().clone().float()
@@ -259,7 +265,7 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
                                 = self.optimizer.state.pop(param)
 
                     # fp32 params.
-                    elif param.type() == 'torch.cuda.FloatTensor':
+                    elif param.type() == 'torch.cuda.FloatTensor' or param.type() == 'torch.FloatTensor':
                         fp32_params_this_group.append(param)
                         param_group['params'][i] = param
 
@@ -470,7 +476,7 @@ class FP32Optimizer(MegatronOptimizer):
             optimizer, clip_grad, log_num_zeros_in_grad,
             params_have_main_grad)
 
-        self._scale = torch.cuda.FloatTensor([1.0])
+        self._scale = torch.FloatTensor([1.0])
 
 
     def zero_grad(self, set_to_none=True):

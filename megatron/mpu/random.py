@@ -40,6 +40,7 @@ _MODEL_PARALLEL_RNG_TRACKER_NAME = 'model-parallel-rng'
 # Whether apply model parallelsim to checkpointed hidden states.
 _CHECKPOINTED_ACTIVATIONS_MEMORY_BUFFER = None
 
+no_cuda = not torch.cuda.is_available()
 
 def init_checkpointed_activations_memory_buffer():
     """Initializ the memory buffer for the checkpointed activations."""
@@ -115,8 +116,9 @@ def gather_split_1d_tensor(tensor):
     world_size = get_tensor_model_parallel_world_size()
     numel = torch.numel(tensor)
     numel_gathered = world_size * numel
+    device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
     gathered = torch.empty(numel_gathered, dtype=tensor.dtype,
-                           device=torch.cuda.current_device(),
+                           device=device,
                            requires_grad=False)
     chunks = [gathered[i*numel:(i+1)*numel] for i in range(world_size)]
     torch.distributed.all_gather(chunks, tensor,
@@ -256,8 +258,9 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Copy the rng states.
         ctx.fwd_cpu_rng_state = torch.get_rng_state()
-        ctx.fwd_cuda_rng_state = torch.cuda.get_rng_state()
-        ctx.fwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
+        if torch.cuda.is_available():
+            ctx.fwd_cuda_rng_state = torch.cuda.get_rng_state()
+            ctx.fwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
 
         with torch.no_grad():
             outputs = run_function(*args)
@@ -288,13 +291,15 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Store the current states.
         bwd_cpu_rng_state = torch.get_rng_state()
-        bwd_cuda_rng_state = torch.cuda.get_rng_state()
-        bwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
+        if torch.cuda.is_available():
+            bwd_cuda_rng_state = torch.cuda.get_rng_state()
+            bwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
 
         # Set the states to what it used to be before the forward pass.
         torch.set_rng_state(ctx.fwd_cpu_rng_state)
-        _set_cuda_rng_state(ctx.fwd_cuda_rng_state)
-        get_cuda_rng_tracker().set_states(ctx.fwd_cuda_rng_state_tracker)
+        if torch.cuda.is_available():
+            _set_cuda_rng_state(ctx.fwd_cuda_rng_state)
+            get_cuda_rng_tracker().set_states(ctx.fwd_cuda_rng_state_tracker)
 
         # Compute the forward pass.
         detached_inputs = detach_variable(inputs)
@@ -303,13 +308,14 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Set the states back to what it was at the start of this function.
         torch.set_rng_state(bwd_cpu_rng_state)
-        _set_cuda_rng_state(bwd_cuda_rng_state)
-        get_cuda_rng_tracker().set_states(bwd_cuda_rng_state_tracker)
+        if torch.cuda.is_available():
+            _set_cuda_rng_state(bwd_cuda_rng_state)
+            get_cuda_rng_tracker().set_states(bwd_cuda_rng_state_tracker)
 
         if isinstance(outputs, torch.Tensor):
             outputs = (outputs,)
         elif len(outputs) == 2 and isinstance(outputs[1], torch.Tensor) and \
-                torch.equal(outputs[1], torch.tensor(0).cuda()):
+                torch.equal(outputs[1], torch.tensor(0)):
             # a hacky solution to overcome issue when running old script examples/pretrain_gpt_distributed.sh
             outputs = (outputs[0],)
         torch.autograd.backward(outputs, args)

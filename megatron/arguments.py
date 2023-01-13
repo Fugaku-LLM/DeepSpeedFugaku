@@ -653,7 +653,7 @@ def _add_distributed_args(parser):
     group.add_argument('--num-layers-per-virtual-pipeline-stage', type=int, default=None,
                        help='Number of layers per virtual pipeline stage')
     group.add_argument('--distributed-backend', default='nccl',
-                       choices=['nccl', 'gloo'],
+                       choices=['nccl', 'gloo', 'mpi'],
                        help='Which backend to use for distributed training.')
     group.add_argument('--DDP-impl', default='local',
                        choices=['local', 'torch'],
@@ -676,6 +676,9 @@ def _add_distributed_args(parser):
     group.add_argument('--use-cpu-initialization', action='store_true',
                        default=None, help='If set, affine parallel weights '
                        'initialization uses CPU' )
+    group.add_argument('--no-cuda', action='store_true',
+                       default=False, help='If set, it does not use cuda')
+    group.add_argument('--device-count', type=int, default=0)
     return parser
 
 

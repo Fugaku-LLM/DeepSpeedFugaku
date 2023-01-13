@@ -44,9 +44,9 @@ def initialize_megatron(extra_args_provider=None, args_defaults={},
     Returns a function to finalize distributed env initialization 
     (optionally, only when args.lazy_mpu_init == True)
     """
-    if not allow_no_cuda:
-        # Make sure cuda is available.
-        assert torch.cuda.is_available(), 'Megatron requires CUDA.'
+    # if not allow_no_cuda:
+    #     # Make sure cuda is available.
+    #     assert torch.cuda.is_available(), 'Megatron requires CUDA.'
 
     # Parse args, build tokenizer, and set adlr-autoresume,
     # tensorboard-writer, and timers.
@@ -185,7 +185,8 @@ def setup_deepspeed_random_and_activation_checkpointing(args):
 def _initialize_distributed():
     """Initialize torch.distributed and mpu."""
     args = get_args()
-    device_count = torch.cuda.device_count()
+    #device_count = torch.cuda.device_count()
+    device_count = 1
     if torch.distributed.is_initialized():
 
         if args.rank == 0:
@@ -206,7 +207,7 @@ def _initialize_distributed():
             else:
                 args.local_rank = device
 
-            torch.cuda.set_device(device) # only do so when device_count > 0
+            # torch.cuda.set_device(device) # only do so when device_count > 0
 
         # Call the init process
         init_method = 'tcp://'

@@ -30,7 +30,8 @@ from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 
 import deepspeed
-from deepspeed.runtime.utils import see_memory_usage
+#from deepspeed.runtime.utils import see_memory_usage
+from utils import see_memory_usage
 import os
 import subprocess
 
@@ -41,7 +42,7 @@ def model_provider(pre_process=True, post_process=True):
     """Build the model."""
 
     print_rank_0('building GPT model ...')
-    see_memory_usage(f"Before Building Model", force=True)
+    see_memory_usage(f"Before Building Model", force=True, cpu_only=True)
 
     args = get_args()
     with deepspeed.zero.Init(data_parallel_group=mpu.get_data_parallel_group(),
@@ -61,8 +62,9 @@ def model_provider(pre_process=True, post_process=True):
             # Predompute the attention mask and store it in args. This avoids having to
             # pipeline it as an activation during training. The mask is constant, and thus
             # we can reuse it.
+            device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
             attention_mask = torch.tril(torch.ones(
-                (1, args.seq_length, args.seq_length), device=torch.cuda.current_device())).view(
+                (1, args.seq_length, args.seq_length), device=device)).view(
                     1, 1, args.seq_length, args.seq_length)
 
             # Convert attention mask to binary:
@@ -82,7 +84,7 @@ def model_provider(pre_process=True, post_process=True):
                 pre_process=pre_process,
                 post_process=post_process
             )
-    see_memory_usage(f"After Building Model", force=True)
+    see_memory_usage(f"After Building Model", force=True, cpu_only=True)
     return model
 
 

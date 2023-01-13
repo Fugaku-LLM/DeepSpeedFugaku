@@ -46,7 +46,7 @@ def _build_key_size_numel_dictionaries(keys, data):
             offset += max_dim
 
     # Move to GPU and broadcast.
-    sizes_cuda = torch.cuda.LongTensor(sizes)
+    sizes_cuda = torch.LongTensor(sizes)
     torch.distributed.broadcast(sizes_cuda, get_tensor_model_parallel_src_rank(),
                                 group=get_tensor_model_parallel_group())
 
@@ -89,15 +89,16 @@ def broadcast_data(keys, data, datatype):
                                                                           data)
 
     # Pack on rank zero.
+    device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
     if get_tensor_model_parallel_rank() == 0:
         # Check that all keys have the same data type.
         _check_data_types(keys, data, datatype)
         # Flatten the data associated with the keys
         flatten_data = torch.cat(
-            [data[key].contiguous().view(-1) for key in keys], dim=0).cuda()
+            [data[key].contiguous().view(-1) for key in keys], dim=0).to(device)
     else:
         flatten_data = torch.empty(total_numel,
-                                   device=torch.cuda.current_device(),
+                                   device=device,
                                    dtype=datatype)
 
     # Broadcast
