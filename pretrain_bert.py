@@ -79,8 +79,9 @@ def data_post_process(data, data_sampler_state_dict):
         if 'seqlen_truncate' in data_sampler_state_dict['current_difficulties']:
             effective_seqlen = data_sampler_state_dict['current_difficulties']['seqlen_truncate']
         else:
+            device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
             effective_seqlen = torch.count_nonzero(data['padding_mask'], dim=1)
-            effective_seqlen = torch.max(effective_seqlen).to(torch.cuda.current_device())
+            effective_seqlen = torch.max(effective_seqlen).to(device)
             torch.distributed.all_reduce(effective_seqlen,
                 op=torch.distributed.ReduceOp.MAX,
                 group=mpu.get_data_parallel_group())
