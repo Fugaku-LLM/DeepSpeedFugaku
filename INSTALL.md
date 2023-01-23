@@ -11,13 +11,21 @@ Install DeepSpeedFugaku and Python modules
     ln -s $WORK $HOME/work
     ```
 1. Move to work directory
-    `cd $HOME/work`
+    ```
+    cd $HOME/work
+    ```
 2. Change user group
-    `newgrp hp190122`
+    ```
+    newgrp hp190122
+    ```
 3. Launch interactive job
-    `pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004`
+    ```
+    pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
+    ```
 4. Enable pre-built PyTorch v1.7.0
-	`source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src`
+    ```
+	source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src`
+    ```
 5. Install required Python modules
 	```
 	export PYTHONUSERBASE=$HOME/work/.local
@@ -37,11 +45,17 @@ Prepare training dataset
 ------------------------
 
 1. Move to DeepSpeedFugaku directory
-    `cd $HOME/work/DeepSpeedFugaku`
+    ```
+    cd $HOME/work/DeepSpeedFugaku
+    ```
 2. Change user group
-    `newgrp hp190122`
+    ```
+    newgrp hp190122
+    ```
 3. Launch interactive job
-    `pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004`
+    ```
+    pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004`
+    ```
 4. Download gpt2-vocab.json and gpt2-merges.txt
     ```
     cd dataset
@@ -77,26 +91,42 @@ Execute pre-training
 ### Interactive job
 
 1. Move to DeepSpeedFugaku directory
-    `cd $HOME/work/DeepSpeedFugaku`
+    ```
+    cd $HOME/work/DeepSpeedFugaku
+    ```
 2. Change user group
-    `newgrp hp190122`
+    ```
+    newgrp hp190122`
+    ```
 3. Launch interactive job
-    `pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004`
+    ```
+    pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
+    ```
 4. Enable pre-built PyTorch v1.7.0
-	`source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src`
+    ```
+	source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src
+    ```
 5. Export environment variables
     ```
     export PYTHONUSERBASE=$HOME/work/.local
     export PATH=$PATH:$PYTHONUSERBASE/bin
     ```
 6. Execute job
+    ```
     sh run_pretrain_gpt_fugaku.sh
+    ```
 
 ### Batch job
 
 1. Move to DeepSpeedFugaku directory
-    `cd $HOME/work/DeepSpeedFugaku`
+    ```
+    cd $HOME/work/DeepSpeedFugaku
+    ```
 2. Change user group
-    `newgrp hp190122`
+    ```
+    newgrp hp190122
+    ```
 3. Execute job
-    `pjsub run_pretrain_gpt_fugaku.sh`
+    ```
+    pjsub run_pretrain_gpt_fugaku.sh
+    ```
