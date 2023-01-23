@@ -24,7 +24,7 @@ Install DeepSpeedFugaku and Python modules
     ```
 4. Enable pre-built PyTorch v1.7.0
     ```
-	source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src`
+	source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src
     ```
 5. Install required Python modules
 	```
@@ -54,7 +54,7 @@ Prepare training dataset
     ```
 3. Launch interactive job
     ```
-    pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004`
+    pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
     ```
 4. Download gpt2-vocab.json and gpt2-merges.txt
     ```
@@ -96,7 +96,7 @@ Execute pre-training
     ```
 2. Change user group
     ```
-    newgrp hp190122`
+    newgrp hp190122
     ```
 3. Launch interactive job
     ```
@@ -126,7 +126,7 @@ Execute pre-training
     ```
     newgrp hp190122
     ```
-3. Execute job
+3. Submit job
     ```
     pjsub run_pretrain_gpt_fugaku.sh
     ```
