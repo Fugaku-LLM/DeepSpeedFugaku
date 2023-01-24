@@ -56,12 +56,21 @@ Prepare training dataset
     ```
     pjsub --interact -L "node=1" -L "rscunit=rscunit_ft01" -L "rscgrp=int" -L "elapse=6:00:00" --sparam "wait-time=600" --mpi "proc=48" -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
     ```
-4. Download gpt2-vocab.json and gpt2-merges.txt
+4. Enable pre-built PyTorch v1.7.0
+    ```
+	source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src
+    ```
+5. Export environment variables
+    ```
+    export PYTHONUSERBASE=$HOME/work/.local
+    export PATH=$PATH:$PYTHONUSERBASE/bin
+    ```
+6. Download gpt2-vocab.json and gpt2-merges.txt
     ```
     cd dataset
     sh download_vocab.sh
     ```
-5. Download dataset and convert to JSON format
+7. Download dataset and convert to JSON format
     ```
     export HF_DATASETS_CACHE="$HOME/work/DeepSpeedFugaku/.cache"
     mkdir -p $HF_DATASETS_CACHE
@@ -71,7 +80,7 @@ Prepare training dataset
     train_data.to_json("codeparrot_data.json", lines=True)
     EOF
     ```
-6. Preprocess dataset
+8. Preprocess dataset
     ```
     python tools/preprocess_data.py \
            --input dataset/codeparrot_data.json \
