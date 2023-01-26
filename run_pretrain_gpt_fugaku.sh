@@ -25,6 +25,7 @@ DISTRIBUTED_ARGS="--nproc_per_node $WORLD_SIZE \
          --node_rank 0 \
          --master_addr localhost \
          --master_port 6000"
+export OMP_PROC_BIND=FALSE
 OMP_NUM_THREADS=4 python -m torch.distributed.launch $DISTRIBUTED_ARGS ./pretrain_gpt.py \
         $MODEL_ARGS \
         $OUTPUT_ARGS \
