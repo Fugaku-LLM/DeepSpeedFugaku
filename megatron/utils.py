@@ -16,6 +16,8 @@
 """General utilities."""
 
 import sys
+import psutil
+import gc
 
 import torch
 from torch.nn.parallel import DistributedDataParallel as torchDDP
@@ -103,20 +105,35 @@ def average_losses_across_data_parallel_group(losses):
 
 
 def report_memory(name):
-    """Simple GPU memory report."""
-    mega_bytes = 1024.0 * 1024.0
-    string = name + ' memory (MB)'
-    string += ' | allocated: {}'.format(
-        torch.cuda.memory_allocated() / mega_bytes)
-    string += ' | max allocated: {}'.format(
-        torch.cuda.max_memory_allocated() / mega_bytes)
-    string += ' | reserved: {}'.format(
-        torch.cuda.memory_reserved() / mega_bytes)
-    string += ' | max reserved: {}'.format(
-        torch.cuda.max_memory_reserved() / mega_bytes)
+    """Simple GPU and CPU memory report."""
+    if torch.cuda.is_available():
+        mega_bytes = 1024.0 * 1024.0
+        string = name + ' GPU memory (MB)'
+        string += ' | allocated: {}'.format(
+            torch.cuda.memory_allocated() / mega_bytes)
+        string += ' | max allocated: {}'.format(
+            torch.cuda.max_memory_allocated() / mega_bytes)
+        string += ' | reserved: {}'.format(
+            torch.cuda.memory_reserved() / mega_bytes)
+        string += ' | max reserved: {}'.format(
+            torch.cuda.max_memory_reserved() / mega_bytes)
+        if mpu.get_data_parallel_rank() == 0:
+            print("[Rank {}] {}".format(torch.distributed.get_rank(), string),
+                flush=True)
+    # cpu memory report
+    gc.collect()
+    vm_stats = psutil.virtual_memory()
+    total_MB = round(vm_stats.total / mega_bytes, 2)
+    avail_MB = round(vm_stats.available / mega_bytes, 2)
+    used_MB = round((vm_stats.total - vm_stats.available) / mega_bytes, 2)
+    used_percent = round(used_MB / total_MB * 100, 2)
+    string_cpu = name + ' CPU memory (MB)'
+    string_cpu += f' | used: {used_MB} | total: {total_MB} | avail: {avail_MB} | used percent: {used_percent}'
     if mpu.get_data_parallel_rank() == 0:
-        print("[Rank {}] {}".format(torch.distributed.get_rank(), string),
+        print("[Rank {}] {}".format(torch.distributed.get_rank(), string_cpu),
               flush=True)
+
+    
 
 
 def print_params_min_max_norm(optimizer, iteration):
