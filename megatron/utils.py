@@ -106,8 +106,8 @@ def average_losses_across_data_parallel_group(losses):
 
 def report_memory(name):
     """Simple GPU and CPU memory report."""
+    mega_bytes = 1024.0 * 1024.0
     if torch.cuda.is_available():
-        mega_bytes = 1024.0 * 1024.0
         string = name + ' GPU memory (MB)'
         string += ' | allocated: {}'.format(
             torch.cuda.memory_allocated() / mega_bytes)
