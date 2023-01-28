@@ -21,6 +21,24 @@ import os
 import torch
 import deepspeed
 
+def get_rank():
+    rank = None
+    rank_environment_variables = [
+        'RANK', # defalut
+        'OMPI_COMM_WORLD_RANK', # OpenMPI
+        'PMIX_RANK', # Fugaku
+        'PMI_RANK' # IntelMPI, mpich2
+        'MV2_COMM_WORLD_RANK' # mvapich2
+    ]
+    for environment_variable in rank_environment_variables:
+        rank = os.environ.get(environment_variable)
+        if rank is not None:
+            return int(rank)
+    if os.environ.get('RANK') is not None:
+        return int(os.environ.get('RANK'))
+    elif os.environ.get('OMPI_COMM_WORLD_RANK') is not None:
+        return int()
+
 def parse_args(extra_args_provider=None, defaults={},
                ignore_unknown_args=False):
     """Parse all arguments."""
