@@ -76,6 +76,8 @@ def initialize_megatron(extra_args_provider=None, args_defaults={},
         set_tensor_model_parallel_rank(args.rank)    
         return finish_mpu_init
     else:
+        args.use_cpu_initialization=True
+
         # Megatron's MPU is the master. Complete initialization right away.
         finish_mpu_init()
 
@@ -86,7 +88,7 @@ def initialize_megatron(extra_args_provider=None, args_defaults={},
         _init_autoresume()
 
         # Compile dependencies.
-        _compile_dependencies()
+        #_compile_dependencies()
 
         # No continuation function
         return None
@@ -139,7 +141,8 @@ def _compile_dependencies():
         torch.distributed.barrier()
     else:
         torch.distributed.barrier()
-        fused_kernels.load(args)
+        if torch.cuda.device_count() > 0: # Skip when CPU-only
+            fused_kernels.load(args)
     # Simple barrier to make sure all ranks have passed the
     # compilation phase successfully before moving on to the
     # rest of the program. We think this might ensure that
@@ -201,11 +204,13 @@ def _initialize_distributed():
         # Manually set the device ids.
         if device_count > 0:
             device = args.rank % device_count
+            """
             if args.local_rank is not None:
                 assert args.local_rank == device, \
                     'expected local-rank to be the same as rank % device-count.'
             else:
                 args.local_rank = device
+            """
 
             # torch.cuda.set_device(device) # only do so when device_count > 0
 

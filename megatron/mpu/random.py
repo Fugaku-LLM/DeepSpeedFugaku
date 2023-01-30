@@ -315,7 +315,8 @@ class CheckpointFunction(torch.autograd.Function):
         if isinstance(outputs, torch.Tensor):
             outputs = (outputs,)
         elif len(outputs) == 2 and isinstance(outputs[1], torch.Tensor) and \
-                torch.equal(outputs[1], torch.tensor(0)):
+                torch.equal(outputs[1], torch.tensor(0.)):
+                #torch.equal(outputs[1], torch.tensor(0)):
             # a hacky solution to overcome issue when running old script examples/pretrain_gpt_distributed.sh
             outputs = (outputs[0],)
         torch.autograd.backward(outputs, args)

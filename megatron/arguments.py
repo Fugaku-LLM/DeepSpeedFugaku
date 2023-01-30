@@ -21,6 +21,24 @@ import os
 import torch
 import deepspeed
 
+def get_rank():
+    rank = None
+    rank_environment_variables = [
+        'RANK', # defalut
+        'OMPI_COMM_WORLD_RANK', # OpenMPI
+        'PMIX_RANK', # Fugaku
+        'PMI_RANK' # IntelMPI, mpich2
+        'MV2_COMM_WORLD_RANK' # mvapich2
+    ]
+    for environment_variable in rank_environment_variables:
+        rank = os.environ.get(environment_variable)
+        if rank is not None:
+            return int(rank)
+    if os.environ.get('RANK') is not None:
+        return int(os.environ.get('RANK'))
+    elif os.environ.get('OMPI_COMM_WORLD_RANK') is not None:
+        return int()
+
 def parse_args(extra_args_provider=None, defaults={},
                ignore_unknown_args=False):
     """Parse all arguments."""
@@ -63,7 +81,7 @@ def parse_args(extra_args_provider=None, defaults={},
     args.ds_pipeline_enabled = not args.no_pipeline_parallel
 
     # Distributed args.
-    args.rank = int(os.getenv('RANK', '0'))
+    args.rank = int(os.getenv('OMPI_COMM_WORLD_RANK', '0'))
     args.world_size = int(os.getenv("WORLD_SIZE", '1'))
     # Tensor model parallel size.
     args.tensor_model_parallel_size = min(

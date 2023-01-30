@@ -57,14 +57,16 @@ def _communicate(tensor_send_next, tensor_send_prev, recv_prev, recv_next,
     if args.fp32_residual_connection:
         dtype = torch.float
     if recv_prev:
+        device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
         tensor_recv_prev = torch.empty(tensor_chunk_shape,
                                        requires_grad=True,
-                                       device=torch.cuda.current_device(),
+                                       device=device,
                                        dtype=dtype)
     if recv_next:
+        device = torch.cuda.current_device() if torch.cuda.is_available() else 'cpu'
         tensor_recv_next = torch.empty(tensor_chunk_shape,
                                        requires_grad=True,
-                                       device=torch.cuda.current_device(),
+                                       device=device,
                                        dtype=dtype)
 
     # Split tensor into smaller chunks if using scatter-gather optimization.
@@ -109,7 +111,8 @@ def _communicate(tensor_send_next, tensor_send_prev, recv_prev, recv_next,
             for req in reqs:
                 req.wait()
     # To protect against race condition when using batch_isend_irecv().
-    torch.cuda.synchronize()
+    # torch.cuda.synchronize()
+    torch.distributed.barrier()
 
     # If using scatter-gather optimization, gather smaller chunks.
     if args.scatter_gather_tensors_in_pipeline:

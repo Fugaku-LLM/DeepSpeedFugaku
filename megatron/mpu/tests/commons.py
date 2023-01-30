@@ -49,7 +49,7 @@ def initialize_distributed(backend='nccl'):
     local_rank = args.local_rank
 
     # Get rank and world size.
-    rank = int(os.getenv('RANK', '0'))
+    rank = int(os.getenv('OMPI_COMM_WORLD_RANK', '0'))
     world_size = int(os.getenv("WORLD_SIZE", '1'))
 
     print('> initializing torch.distributed with local rank: {}, '
