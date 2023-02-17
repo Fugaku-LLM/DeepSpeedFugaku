@@ -26,3 +26,5 @@
 
 ### Comments
 - ^ Estimated from the per-core-group performance
+- max-proc-per-node=4 with mp=4 does not work.
+
