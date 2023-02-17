@@ -9,8 +9,8 @@
 |   1 (LD_PRELOAD=libtcmalloc.so) | 124M |1 |  1 |  1 |   1 | 1024 | - MiB | 976.2 | 0.86 | 0.0008 | 02-15 |
 |   1 (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |1 |  1 |  1 |   1 | 1024 |  - | 827.2 | 1.01| 0.001 | 02-15 |
 |   1 (max-proc-per-node=4)| 124M |4 |  1 |  1 |   1 | 1024 |  22266.2 MiB | 721.7 | 1.16^| 0.001 | 02-15 |
-|   1 (max-proc-per-node=4)| 124M |1 |  4 |  1 |   1 | 1024 |  - | - | -| - | 02-15 |
-|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 |  - | - | -| - | 02-15 |
+|   1 (max-proc-per-node=4)| 124M |1 |  4 |  1 |   1 | 1024 |  - | 722.5 | 1.16^| 0.001 | 02-15 |
+|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 | - |522.7 | 1.60^ | 0.001| 02-15 |
 |   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |1 |  4 |  1 |   1 | 1024 |  - | - | -| - | 02-15 |
 
 ### 1.3B model, Sequence Length=1024, \w Activation Checkpointing
@@ -21,8 +21,8 @@
 |   1 (2.2Hz) | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB | 10532.4 |  1.10 |  0.001 | 02-15 |
 |   1 (LD_PRELOAD=libtcmalloc.so) | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
 |   1 (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0") | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
-|   1 (max-proc-per-node=4)|| 1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
-|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|| 1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (max-proc-per-node=4)|1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
 
 ### Comments
 - ^ Estimated from the per-core-group performance
