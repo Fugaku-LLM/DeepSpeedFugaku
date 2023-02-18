@@ -13,6 +13,11 @@
 |   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 | - |522.7 | 1.60^ | 0.001| 02-15 |
 |   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |1 |  4 |  1 |   1 | 1024 |  - | - | -| - | 02-15 |
 
+### 124M model, Sequence Length=1024, PyTorch 1.10
+|   1 (max-proc-per-node=4)| 124M |4 |  1 |  1 |   1 | 1024 |  - MiB |  - | - | -| - |
+|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 |   - MiB |  - | - | -| - |
+
+
 ### 1.3B model, Sequence Length=1024, \w Activation Checkpointing
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
