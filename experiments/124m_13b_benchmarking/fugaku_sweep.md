@@ -3,7 +3,7 @@
 ### 124M model, Sequence Length=1024, PyTorch 1.10
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
-|   1 (max-proc-per-node=4)| 124M |4 |  1 |  1 |   1 | 1024 |  - MiB |  0.34^^ | - | -| 02-15, 21103755 |
+|   1 (max-proc-per-node=4)| 124M |4 |  1 |  1 |   1 | 1024 |  - MiB |613.2 |   0.34^^ | -| 02-15, 21103755 |
 |   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 |25201.0 MiB |  363.6 | 2.28^ | 0.002| 02-15 |
 | 512 | 124M | 512 |  1 | 1  |   1 | 1024 |8223.2 MiB | 3.7 | 0.43 | 0.215 |02-15 |
 | 512 (2.2Hz) | 124M | 512 |  1 | 1  |   1 | 1024| 8347.0 MiB | 3.2| 0.50| - |02-15 |
