@@ -17,14 +17,15 @@
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
 |   1 | 1.3B |1 |  1 |  1 |   1 | 1024 |28406.7 MiB | 11727.9 |  0.99 | 0.001 | 02-14 |
-|   1 ("retention_state=0") | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 ("retention_state=0") | 1.3B | 1|  1 |  1 |   1 | 1024 |29081.7 MiB |  10023.9 | 1.13 | 0.001| 02-15 |
 |   1 (2.2Hz) | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB | 10532.4 |  1.10 |  0.001 | 02-15 |
-|   1 (LD_PRELOAD=libtcmalloc.so) | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
-|   1 (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0") | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
-|   1 (max-proc-per-node=4)|1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
-|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (LD_PRELOAD=libtcmalloc.so)^^  | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")^^  | 1.3B | 1|  1 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (max-proc-per-node=4)^^ |1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
+|   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")^^ |1.3B | 1|  4 |  1 |   1 | 1024 |28356.1 MiB |  - | - | -| - | 02-15 |
 
 ### Comments
 - ^ Estimated from the per-core-group performance
+- ^^ Stuck after the first epoch
 - max-proc-per-node=4 with mp=4 does not work.
 
