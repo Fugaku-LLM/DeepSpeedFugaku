@@ -14,7 +14,7 @@
 
 ## Experiments
 
-### Sequence Length=1024
+### Sequence Length=1024, w\o Activation Checkpointing
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
 |   1 | 124M |1 |  1 |  1 |   1 | 1024 |  7718.0 MiB | 1489.7 | 0.56| 0.0005 |02-15 |
@@ -50,7 +50,7 @@
 | 512 | 124M | 512 |  1 | 1  |   1 | 1024 |4551.8 MiB | 5.4 | 0.40 | 0.200 | 02-15 |
 | 512  (2.2Hz)| 124M | 512 |  1 | 1  |   2 | 1024 |5213.7 MiB | 4.2 | 0.51| 0.255 |02-15 |
 
-### 1.3 Sequence Length=2048
+### 1.3 Sequence Length=2048, w\o Activation Checkpointing
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs* |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
 |   1 | 124M |1 |  1 |  1 |   1 | 1024 |  - MiB | - | -| - |- |
