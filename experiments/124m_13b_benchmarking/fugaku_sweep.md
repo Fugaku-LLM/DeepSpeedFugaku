@@ -6,9 +6,9 @@
 |   1 (max-proc-per-node=4)| 124M |4 |  1 |  1 |   1 | 1024 |  - MiB |  - | - | -| 02-15, 21103755 |
 |   1 (max-proc-per-node=4, 2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")| 124M |4 |  1 |  1 |   1 | 1024 |25201.0 MiB |  363.6 | 2.28^ | 0.002| 02-15 |
 | 512 | 124M | 512 |  1 | 1  |   1 | 1024 |8223.2 MiB | 3.7 | 0.43 | 0.215 |02-15 |
-| 512 (2.2Hz) | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | -| -| - |02-15 |
-| 512 (2.2Hz,  "retention_state=0") | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | -| -| - |02-15 |
-| 512  (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|124M | 512 |  1 | 1  |   2 | 1024| - MiB | -| -| - |02-15 |
+| 512 (2.2Hz) | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | -| -| - |02-15,21103836 |
+| 512 (2.2Hz,  "retention_state=0") | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | 14.39| 0.11| - |02-15,21103837 |
+| 512  (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|124M | 512 |  1 | 1  |   2 | 1024| - MiB |  14.39†| 0.11| - |02-15|
 
 
 ### 124M model, Sequence Length=1024, PyTorch 1.7
@@ -39,5 +39,8 @@
 ### Comments
 - ^ Estimated from the per-core-group performance
 - ^^ Stuck after the first epoch
+- † Forward pass and backward reduce are taking a lot of time.
+<img width="618" alt="Screen Shot 2023-02-18 at 15 35 50" src="https://user-images.githubusercontent.com/18011504/219896545-a059496d-00af-44be-b3dd-52734865400e.png">
+
 - max-proc-per-node=4 with mp=4 does not work.
 
