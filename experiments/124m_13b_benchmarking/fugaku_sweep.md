@@ -12,9 +12,10 @@
 | 512 (max-proc-per-node=4)| 124M | 512 |  4 |  1 |   1 | 1024 |  - | - | -| - | - |
 | 512 (2.2Hz) | 124M | 512 |  1 | 1  |   1 | 1024| 8347.0 MiB | 3.2| 0.50| - |02-15 |
 | 512 (LD_PRELOAD=libtcmalloc.so) | 124M | 512 |  1 | 1  |   1 | 1024| - MiB |7.8 | 0.21| - |02-15|
-| 512 (LD_PRELOAD=libtcmalloc.so, torch_ddp) | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | - | -| - |02-15|
+| 512 (LD_PRELOAD=libtcmalloc.so, torch_ddp) | 124M | 512 |  1 | 1  |   1 | 1024| - MiB | - | -| - |02-15, 21107463|
 | 512 (2.2Hz,  "retention_state=0") | 124M | 512 |  1 | 1  |   1 | 1024| 8362.1 MiB | 3.2|  0.50| - |02-15 |
 | 512  (2.2Hz, LD_PRELOAD=libtcmalloc.so, "retention_state=0")|124M | 512 |  1 | 1  |   2 | 1024| - MiB |  14.39†| 0.11| - |02-15|
+| 512 (max-proc-per-node=4, 2.2Hz)| 124M | 512 |  4 |  1 |   1 | 1024 |  - | - | -| - | - |
 
 
 ### 124M model, Sequence Length=1024, PyTorch 1.7
