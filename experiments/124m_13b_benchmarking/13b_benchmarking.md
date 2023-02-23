@@ -14,13 +14,12 @@
 
 ## Experiments
 
-### Sequence Length=1024 \w Activation Checkpointing
+### Sequence Length=1024 \w Activation Checkpointing, PyTorch 1.10
 | Nodes | Freq   | Size | DP  | TP | PP | MBS  | GBS  | Mem         | Sec/it | TFLOPs | Est. Aggr. PetaFLOPs| Notes |
 | ----: | -----: | ---: | --: | -: | -: | ---: | ---: | ----------: | -----: | -----: | ------------------: | ----: |
+|    12 | 2.0GHz |  13B |  1 |  1 |  12 |   1 | 1000 |       - MiB | - |  - | - | - |
 |    20 | 2.0GHz |  13B |   1 | 20 |  1 |    1 | 1024 | 14272.9 MiB | 7717.7 |   0.72 |              0.0144 |     - |
-|   100 | 2.0GHz |  13B |  10 |  1 |  1 |   10 | 1000 |       - MiB | - |  - | - | - |
-|  1000 | 2.0GHz |  13B | 100 |  1 |  1 |   10 | 1000 |       - MiB | - |  - | - | - |
-|  2000 | 2.0GHz |  13B | 200 |  1 |  1 |   10 | 2000 |       - MiB | - |  - | - | - |
-|  2000 | 2.2GHz |  13B | 200 |  1 |  1 |   10 | 2000 |       - MiB | - |  - | - | - |
+|    24 | 2.0GHz |  13B |  2 |  1 |  12 |   1 | 1000 |       - MiB | - |  - | - | - |
+|    40 | 2.0GHz |  13B |  2 |  20 |  1 |   1 | 1024 |       - MiB | - |  - | - | - |
 
 ## Comments
