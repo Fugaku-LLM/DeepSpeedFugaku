@@ -19,6 +19,7 @@ import torch
 import torch.nn.functional as F
 
 from megatron import get_args
+from megatron import get_timers
 from megatron import mpu
 from .module import MegatronModule
 from megatron.model.enums import AttnMaskType, LayerType, AttnType
@@ -199,11 +200,13 @@ class ParallelAttention(MegatronModule):
     def forward(self, hidden_states, attention_mask, layer_past=None,
                 get_key_value=False, encoder_output=None):
         # hidden_states: [sq, b, h]
+        timers = get_timers()
 
         # =====================
         # Query, Key, and Value
         # =====================
 
+        timers('qkv').start()
         if self.attention_type == AttnType.self_attn:
             # Attention heads [sq, b, h] --> [sq, b, (np * 3 * hn)]
             mixed_x_layer, _ = self.query_key_value(hidden_states)
@@ -239,6 +242,7 @@ class ParallelAttention(MegatronModule):
                 (self.num_attention_heads_per_partition,
                  self.hidden_size_per_attention_head)
             query_layer = query_layer.view(*new_tensor_shape)
+        timers('qkv').stop()
 
         # ==================================
         # Adjust key and value for inference
@@ -280,11 +284,13 @@ class ParallelAttention(MegatronModule):
             device=device)
 
         # Raw attention scores. [b * np, sq, sk]
+        timers('baddbmm').start()
         matmul_result = torch.baddbmm(
             matmul_result,
             query_layer.transpose(0, 1),   # [b * np, sq, hn]
             key_layer.transpose(0, 1).transpose(1, 2),  # [b * np, hn, sk]
             beta=0.0, alpha=(1.0/self.norm_factor))
+        timers('baddbmm').stop()
 
         # change view to [b, np, sq, sk]
         attention_scores = matmul_result.view(*output_size)
@@ -341,7 +347,9 @@ class ParallelAttention(MegatronModule):
                                                output_size[2], -1)
 
         # matmul: [b * np, sq, hn]
+        timers('bmm').start()
         context_layer = torch.bmm(attention_probs, value_layer.transpose(0, 1))
+        timers('bmm').stop()
 
         # change view [b, np, sq, hn]
         context_layer = context_layer.view(*output_size)
@@ -358,7 +366,9 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
+        timers('dense').start()
         output, bias = self.dense(context_layer)
+        timers('dense').stop()
 
         if get_key_value:
             output = [output, present]
@@ -470,15 +480,18 @@ class ParallelTransformerLayer(MegatronModule):
                 encoder_output=None, enc_dec_attn_mask=None,
                 layer_past=None, get_key_value=False):
         # hidden_states: [b, s, h]
+        timers = get_timers()
 
         # Layer norm at the beginning of the transformer layer.
         layernorm_output = self.input_layernorm(hidden_states)
         # Self attention.
+        timers('attention').start()
         attention_output, attention_bias = \
             self.attention(layernorm_output,
                                 attention_mask,
                                 layer_past=layer_past,
                                 get_key_value=get_key_value)
+        timers('attention').stop()
 
         if get_key_value:
             attention_output, presents = attention_output
@@ -538,10 +551,12 @@ class ParallelTransformerLayer(MegatronModule):
         moe_loss = torch.tensor(0.0, device=layernorm_output.device, dtype=layernorm_output.dtype)
         mlp_bias = torch.tensor(0.0, device=layernorm_output.device, dtype=layernorm_output.dtype)
 
+        timers('mlp').start()
         if self.num_experts == 1:
             mlp_output, mlp_bias = self.mlp(layernorm_output)
         else:
             mlp_output, moe_loss, _ = self.mlp(layernorm_output)
+        timers('mlp').stop()
 
         # Second residual connection.
         if self.apply_residual_connection_post_layernorm:

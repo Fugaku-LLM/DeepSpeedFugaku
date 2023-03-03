@@ -18,6 +18,8 @@
 import os
 import sys
 import time
+import glob
+import traceback
 
 import torch
 
@@ -232,6 +234,19 @@ class Timers:
 
     def __init__(self):
         self.timers = {}
+        #if torch.distributed.is_initialized():
+        #    if torch.distributed.get_rank() == 0:
+        #        if os.path.exists('timer'):
+        #            for fname in glob.glob('timer/timer.*'):
+        #                os.remove(fname)
+        #        else:
+        #            os.mkdir('timer')
+        #else:
+        #    if os.path.exists('timer'):
+        #        for fname in glob.glob('timer/timer.*'):
+        #            os.remove(fname)
+        #    else:
+        #        os.mkdir('timer')
 
     def __call__(self, name):
         if name not in self.timers:
@@ -262,3 +277,18 @@ class Timers:
                 print(string, flush=True)
         else:
             print(string, flush=True)
+
+    def out(self, names, normalizer=1.0, reset=True):
+        """Log a group of timers."""
+        assert normalizer > 0.0
+        string = 'time (ms)'
+        for name in names:
+            elapsed_time = self.timers[name].elapsed(
+                reset=reset) * 1000.0 / normalizer
+            string += ' | {}: {:.2f}'.format(name, elapsed_time)
+        if torch.distributed.is_initialized():
+            rank = torch.distributed.get_rank()
+        else:
+            rank = 0
+        with open(f'timer/timer.{rank:06d}', 'a') as f:
+            f.write(string + '\n')

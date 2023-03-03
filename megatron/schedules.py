@@ -132,6 +132,7 @@ def forward_backward_no_pipelining(forward_step_func, data_iterator, model,
     model = model[0]
 
     args = get_args()
+    timers = get_timers()
 
     context_handler = dummy_handler
     if isinstance(model, torchDDP):
@@ -144,11 +145,15 @@ def forward_backward_no_pipelining(forward_step_func, data_iterator, model,
     input_tensor, output_tensor_grad = None, None
     with context_handler():
         for i in range(get_num_microbatches() - 1):
+            timers('forward_step').start()
             output_tensor = forward_step(forward_step_func, data_iterator, model,
                                          input_tensor, losses_reduced)
+            timers('forward_step').stop()
             if not forward_only:
+                timers('backward_step').start()
                 backward_step(optimizer, input_tensor, output_tensor,
                               output_tensor_grad, model)
+                timers('backward_step').stop()
 
     if args.deepspeed:
         model.set_gradient_accumulation_boundary(True)

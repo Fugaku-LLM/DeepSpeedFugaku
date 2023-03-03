@@ -36,6 +36,7 @@ from .utils import divide
 from .utils import split_tensor_along_last_dim
 from .utils import VocabUtility
 from megatron import get_args
+from megatron import get_timers
 import deepspeed.runtime.activation_checkpointing.checkpointing as ds_checkpointing
 
 
@@ -395,18 +396,23 @@ class RowParallelLinear(torch.nn.Module):
 
 
     def forward(self, input_):
+        timers = get_timers()
         # Set up backprop all-reduce.
         if self.input_is_parallel or self.is_expert_without_slicing:
             input_parallel = input_
         else:
             input_parallel = scatter_to_tensor_model_parallel_region(input_)
         # Matrix multiply.
+        timers('row_par_lin_mm').start()
         output_parallel = F.linear(input_parallel, self.weight)
+        timers('row_par_lin_mm').stop()
         # All-reduce across all the partitions.
         if self.is_expert_without_slicing: # non-expert only tensor-parallelism
             output_ = output_parallel
         else:
+            timers('row_par_lin_allreduce').start()
             output_ = reduce_from_tensor_model_parallel_region(output_parallel)
+            timers('row_par_lin_allreduce').stop()
 
         if not self.skip_bias_add:
             output = output_ + self.bias if self.bias is not None else output_
