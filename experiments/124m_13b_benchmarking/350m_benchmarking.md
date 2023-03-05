@@ -17,4 +17,5 @@
 ### Sequence Length=1024, w\o Activation Checkpointing, PyTorch 1.10
 | Nodes | Size | DP | TP | PP | MBS |  GBS | Mem  | Sec/it | TFLOPs |Est. Aggr. PetaFLOPs| Notes |
 | ----: | ---: | -: | -: | -: | --: |  --: | ---: | -----: | -----: | ---: | ----: |
-| 4096 | 124M | 1024 |  4 | 1  |   1 | 1024 | - MiB | 2.1 |  0.14| - |- |
+| 4 | 124M | 4 |  8 | 1  |   1 | 512 | - MiB | -  |  - | - |- |
+| 4096 | 124M | 512 |  8 | 1  |   1 | 512 | - MiB | 2.1 |  0.14| - |- |
