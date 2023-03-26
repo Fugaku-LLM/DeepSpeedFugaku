@@ -94,19 +94,26 @@ class ParallelMLP(MegatronModule):
             enable_expert_tensor_parallelism=enable_expert_tensor_parallelism)
 
     def forward(self, hidden_states):
+        timers = get_timers()
 
         # [s, b, 4hp]
+        timers('dense_h_to_4h').start()
         intermediate_parallel, bias_parallel = self.dense_h_to_4h(hidden_states)
+        timers('dense_h_to_4h').stop()
 
+        timers('activation_func').start()
         if self.bias_gelu_fusion:
              intermediate_parallel = \
                      bias_gelu_impl(intermediate_parallel, bias_parallel)
         else:
             intermediate_parallel = \
                 self.activation_func(intermediate_parallel + bias_parallel)
+        timers('activation_func').stop()
 
         # [s, b, h]
+        timers('dense_4h_to_h').start()
         output, output_bias = self.dense_4h_to_h(intermediate_parallel)
+        timers('dense_4h_to_h').stop()
         return output, output_bias
 
 class ParallelAttention(MegatronModule):
@@ -248,6 +255,7 @@ class ParallelAttention(MegatronModule):
         # Adjust key and value for inference
         # ==================================
 
+        timers('adjust_key_value').start()
         if layer_past is not None:
             past_key, past_value = layer_past
             key_layer = torch.cat((past_key.type_as(key_layer),
@@ -256,11 +264,13 @@ class ParallelAttention(MegatronModule):
                                      value_layer), dim=0)
         if get_key_value:
             present = (key_layer, value_layer)
+        timers('adjust_key_value').stop()
 
         # ===================================
         # Raw attention scores. [b, np, s, s]
         # ===================================
 
+        timers('raw_attention_scores').start()
         # [b, np, sq, sk]
         output_size = (query_layer.size(1),
                        query_layer.size(2),
@@ -294,11 +304,13 @@ class ParallelAttention(MegatronModule):
 
         # change view to [b, np, sq, sk]
         attention_scores = matmul_result.view(*output_size)
+        timers('raw_attention_scores').stop()
 
         # ==================================================
         # Update attention mask for inference. [b, np, sq, sk]
         # ==================================================
 
+        timers('update_attention_mask').start()
         if get_key_value:
             with torch.no_grad():
                 if layer_past is not None:
@@ -311,24 +323,30 @@ class ParallelAttention(MegatronModule):
                         ...,
                         :attention_scores.size(3),
                         :attention_scores.size(3)]
+        timers('update_attention_mask').stop()
 
         # ===========================
         # Attention probs and dropout
         # ===========================
 
+        timers('scale_mask_softmax').start()
         # attention scores and attention mask [b, np, sq, sk]
         attention_probs = self.scale_mask_softmax(attention_scores,
                                                   attention_mask)
+        timers('scale_mask_softmax').stop()
 
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
         #with mpu.get_cuda_rng_tracker().fork():
+        timers('attention_dropout').start()
         attention_probs = self.attention_dropout(attention_probs)
+        timers('attention_dropout').stop()
 
         # =========================
         # Context layer. [sq, b, hp]
         # =========================
 
+        timers('context_layer').start()
         # value_layer -> context layer.
         # [sk, b, np, hn] --> [b, np, sq, hn]
 
@@ -361,6 +379,7 @@ class ParallelAttention(MegatronModule):
         new_context_layer_shape = context_layer.size()[:-2] + \
             (self.hidden_size_per_partition,)
         context_layer = context_layer.view(*new_context_layer_shape)
+        timers('context_layer').stop()
 
         # =================
         # Output. [sq, b, h]

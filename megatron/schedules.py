@@ -51,26 +51,36 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
     args = get_args()
 
     timers('forward-compute').start()
+    timers('unwrap_model').start()
     unwrapped_model = unwrap_model(
         model, (torchDDP, LocalDDP, Float16Module))
+    timers('unwrap_model').stop()
+    timers('set_input_tensor').start()
     if not args.deepspeed:
         unwrapped_model.set_input_tensor(input_tensor)
     else:
         unwrapped_model.module.set_input_tensor(input_tensor)
+    timers('set_input_tensor').stop()
 
     # Note: it's recommended to NOT add any new argument to forward_step_func()
     # because it is an abstract API used by many different models and tasks.
     # Changing this API requires changing it in all models/tasks. Instead,
     # it's recommended to use args to pass additional arguments.
+    timers('forward_step_func').start()
     output_tensor, loss_func = forward_step_func(data_iterator, model)
+    timers('forward_step_func').stop()
+    timers('pipeline_last_stage').start()
     if mpu.is_pipeline_last_stage():
+        timers('loss_func').start()
         output_tensor = loss_func(output_tensor)
+        timers('loss_func').stop()
         loss, loss_reduced = output_tensor
         if not args.no_pipeline_parallel:
             output_tensor = loss / get_num_microbatches()
         else:
             output_tensor = loss
         losses_reduced.append(loss_reduced)
+    timers('pipeline_last_stage').stop()
     timers('forward-compute').stop()
 
     return output_tensor
