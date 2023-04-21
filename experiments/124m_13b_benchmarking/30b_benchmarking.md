@@ -15,9 +15,10 @@
 ## Experiments
 
 ### Sequence Length=2048 \w Activation Checkpointing, PyTorch 1.10
-| Nodes | Freq   | Size | DP  | MP | PP | MBS  | GBS  | Mem         | Sec/it | TFLOPs | Est. Aggr. PetaFLOPs| Notes |
-| ----: | -----: | ---: | --: | -: | -: | ---: | ---: | ----------: | -----: | -----: | ------------------: | ----: |
-|    24 | 2.0GHz |  30B |  1 |  1 |  24 |   1 | 1536 |       - MiB | - |  - | - | - |
-|    96 | 2.0GHz |  30B |  4 |  1 |  24 |   1 | 1536 |       - MiB | - |  - | - | - |
-|    96 | 2.0GHz |  30B |  1 |  4 |  24 |   1 | 1536 |       - MiB | - |  - | - | - |
-|    1536 | 2.0GHz |  30B |  64 |  1 |  24 |   1 | 1536 |       - MiB | - |  - | - | - |
+| Nodes | Freq   | Size | DP  | MP | PP | MBS  | GBS  |  AC | Mem         | Sec/it | TFLOPs | Est. Aggr. PetaFLOPs| Notes |
+| ----: | -----: | ---: | --: | -: | -: | ---: | ---: |  --: | ----------: | -----: | -----: | ------------------: | ----: |
+|    24 | 2.0GHz |  30B |  1 |  1 |  24 |   1 | 1536 |  Yes |      - MiB | - |  - | - | - |
+|    96 | 2.0GHz |  30B |  4 |  1 |  24 |   1 | 1536 |  Yes |      - MiB | - |  - | - | - |
+|    96 | 2.0GHz |  30B |  1 |  4 |  24 |   1 | 1536 |  Yes |      - MiB | - |  - | - | - |
+|    96 | 2.0GHz |  30B |  1 |  4 |  24 |   1 | 1536 |  No |      - MiB | - |  - | - | - |
+|    1536 | 2.0GHz |  30B |  64 |  1 |  24 |   1 | 1536 | Yes |       - MiB | - |  - | - | - |
