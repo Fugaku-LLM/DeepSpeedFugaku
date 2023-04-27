@@ -14,7 +14,7 @@
 
 ## Experiments
 
-### Sequence Length=2048 \w Activation Checkpointing, PyTorch 1.10
+### Sequence Length=2048
 | Nodes | Freq   | Size | DP  | MP | PP | MBS  | GBS  |  AC | Mem         | Sec/it | TFLOPs | Est. Aggr. PetaFLOPs| Notes |
 | ----: | -----: | ---: | --: | -: | -: | ---: | ---: |  --: | ----------: | -----: | -----: | ------------------: | ----: |
 |    48 | 2.0GHz |  30B |  1 |  1 |  48 |   1 | 1536 |  Yes |  29138.6 MiB (OOM after first epoch) | 17212.8 |  0.95 | 0.04 | 4/22 |
