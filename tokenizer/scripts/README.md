@@ -1,19 +1,20 @@
 # 使い方
 ## SentencePieceモデルの評価（ユニグラム）
 テキスト上でのトークナイズのPerplexityを計測します．
-JGLUEで配布されているデータのうち，training splitをサンプルとして同梱しています．
+JGLUEで配布されているデータのうち，training splitをサンプルとして`DeepSpeedFugaku/tokenizer/data`に同梱しています．
+
 
 ```
 $  python evalPPL.py \
     -t path/to/sp.model \
-    -d data/jsts-v1.1-train.txt
+    -d ../data/jsts-v1.1-train.txt
 ```
 
 出力例：
 ```
 TOKENIZER: models/cc100ja_1GB_mecab/sp.model
 VOCAB SIZE: 32000
-DATA: ../../data/jglue_rawtexts/jsts-v1.1-train.txt
+DATA: ../data/jglue_rawtexts/jsts-v1.1-train.txt
 # ORIGINAL TOKENS: 350108
 # TOKENS AFTER FILTERING: 348568
         # Ignored BOS: 0
@@ -96,7 +97,7 @@ CC100-jaから1GBをダウンサンプリングして作成したオリジナル
 ```
 TOKENIZER: models/cc100ja_1GB_mecab/cc100ja32K_1GB_mecab.model
 VOCAB SIZE: 32000
-DATA: data/jsts-v1.1-train.txt
+DATA: ../data/jsts-v1.1-train.txt
 # ORIGINAL TOKENS: 350280
 # TOKENS AFTER FILTERING: 348740
         # Ignored BOS: 0
@@ -113,7 +114,7 @@ PPL (NEW UNIGRAM) 274.00
 ```
 TOKENIZER: models/cc100ja_1GB_mecab/cc100ja32K_1GB_mecab.vocab.reestimated_full_em2ep.model
 VOCAB SIZE: 32000
-DATA: data/jsts-v1.1-train.txt
+DATA: ../data/jsts-v1.1-train.txt
 # ORIGINAL TOKENS: 350108
 # TOKENS AFTER FILTERING: 348568
         # Ignored BOS: 0
