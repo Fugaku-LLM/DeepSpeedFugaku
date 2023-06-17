@@ -3,6 +3,8 @@ wandb/
 checkpoints/
 data/
 jobs/
+*.out
+*.stats
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
