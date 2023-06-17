@@ -1,7 +1,8 @@
 # ML
 wandb/
 checkpoints/
-data/
+data/codeparrot
+data/wikipedia
 jobs/
 *.out
 *.stats
