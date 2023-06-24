@@ -178,10 +178,10 @@ def _set_wandb_writer(args):
             now = datetime.now()
             exp_name = args.wandb_name + "-" + str(now).replace(" ", "-")
             wandb_input = {
-                "entity": "okoge",
+                "entity": "gpt-fugaku",
                 "name": exp_name,
                 "config": args,
-                "project": "gpt-abci",
+                "project": "benchmarking-gpt",
             }
             if args.wandb_id is not None:
                 wandb_input["id"] = args.wandb_id
