@@ -23,12 +23,14 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=checkpoints/350m_dp512/
+CHECKPOINT_PATH=checkpoints/350m_dp512_fp32/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
 DATA_PATH=data/wikipedia/binarized/gpt-2/ja_wiki_text_document
 TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
+
+mkdir -p $CHECKPOINT_PATH
 
 output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES -std-proc ${output_path}/stdproc"
@@ -82,4 +84,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
-  --wandb-name "ja-wiki-350m_dp512"
+  --wandb-name "ja-wiki-350m_dp512_fp32"
