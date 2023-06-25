@@ -32,9 +32,11 @@ TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 
 output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES -std-proc ${output_path}/stdproc"
-DATA_PARALLEL_SIZE=1
+
+DATA_PARALLEL_SIZE=4
+
 PIPELINE_MODEL_PARALLEL_SIZE=1
-TENSOR_MODEL_PARALLEL_SIZE=4
+TENSOR_MODEL_PARALLEL_SIZE=1
 PIPELINE_PARALLEL_ARGS="--pipeline-model-parallel-size $PIPELINE_MODEL_PARALLEL_SIZE"
 MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
