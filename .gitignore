@@ -173,3 +173,10 @@ experiments/tensorboard/
 
 dataset/gpt2-merges.txt
 dataset/gpt2-vocab.json
+dataset/wikipedia/binarized
+
+errors/*.err
+outouts/*.out
+
+.python-version
+
