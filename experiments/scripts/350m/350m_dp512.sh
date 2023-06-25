@@ -34,7 +34,9 @@ mkdir -p $CHECKPOINT_PATH
 
 output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES -std-proc ${output_path}/stdproc"
+
 DATA_PARALLEL_SIZE=512
+
 PIPELINE_MODEL_PARALLEL_SIZE=1
 TENSOR_MODEL_PARALLEL_SIZE=1
 PIPELINE_PARALLEL_ARGS="--pipeline-model-parallel-size $PIPELINE_MODEL_PARALLEL_SIZE"
