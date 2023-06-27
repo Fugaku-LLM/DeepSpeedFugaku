@@ -18,7 +18,7 @@ def createNewModel(baseModelPath):
     return tknzr
 
 def loadVocab(vocabPath):
-    vocab = [line.strip().split('\t') for line in open(vocabPath)]
+    vocab = [line.rstrip().split('\t') for line in open(vocabPath)]
     return vocab
 
 def setVocabToTokenizer(tknzr, vocab, args):

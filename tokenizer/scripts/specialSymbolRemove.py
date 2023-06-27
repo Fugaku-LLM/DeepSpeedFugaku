@@ -6,7 +6,7 @@ newVocab = set()
 newVocabList = []
 
 for line in open(sys.argv[1]):
-    line = line.strip()
+    line = line.rstrip()
     token, score = line.split('\t')
     if token == SYMBOL:
         pass

@@ -1,5 +1,6 @@
 import argparse
 import sys
+sys.path.append('multigram')
 from multigram import lm, train
 import sentencepiece as spm
 import numpy as np
@@ -19,6 +20,11 @@ def loadSP(path):
 def loadData(path, sp):
     data = []
     print('LOAD DATA:', path)
+
+    if path.endswith('.pkl'):
+        import pickle
+        return pickle.load(open(path, 'rb'))
+
     for line in tqdm(open(path, encoding='utf-8', errors='ignore')):
         if sp is not None:
             line = normalize(sp, line)
@@ -51,9 +57,10 @@ def selectTrain(mode):
         lmtrain = train.viterbiTrainStepWise
     elif mode=='viterbiBatch':
         lmtrain = train.viterbiTrainBatch
-    else:
-        # (mode=='EM')
+    elif mode=='EM':
         lmtrain = train.EMTrain
+    elif mode=='EMMT':
+        lmtrain = train.EMTrainMultiThread
     return lmtrain
 
 def mlm2tsv(mlm, originalVocab):
@@ -75,7 +82,7 @@ def main():
     parser.add_argument('-v', '--vocab', help='vocab of tsv format for (token, score). score is not necessarily required.')
     parser.add_argument('-d', '--data', help='path to data for training')
     parser.add_argument('-o', '--output', help='path to output')
-    parser.add_argument('-tm', '--trainingMode', choices=['viterbi','viterbiStepWise','viterbiBatch','EM'], default='EM')
+    parser.add_argument('-tm', '--trainingMode', choices=['viterbi','viterbiStepWise','viterbiBatch','EM', 'EMMT'], default='EMMT')
     parser.add_argument('-me', '--maxEpoch', default=10, type=int)
     args = parser.parse_args()
 
