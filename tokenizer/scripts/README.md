@@ -61,11 +61,11 @@ SentencePieceが自動で付与するprefix `▁`を`.vocab`から削除する�
 ### reestimateScore.py
 `.vocab`ファイルと学習データを受け取り，各トークンのスコアを再推定するためのスクリプトです．
 
-この処理は，平岡が作成した以下のリポジトリに依存します．
-（環境を汚すことは強いたくないので，関連スクリプトだけ本リポジトリにコピーすることでpip installの手順を無くす予定です）
+この処理は，平岡が作成した以下のリポジトリに依存しますが，`scripts/multigram`以下に同梱しています．
+必要であれば以下の手順で`pip install`を行ってください．
 ```
-$ git clone https://github.com/tatHi/multigram.git
-$ cd multigram
+(必要な場合のみ)
+$ cd tokenizer/scripts/multigram
 $ pip install --editable .
 ```
 
