@@ -105,6 +105,7 @@ $ python reestimateScore.py \
 ```
 - データの読み込み＋SentencePieceModelによる前処理に時間がかかるので，処理済みのデータを`-d`オプションにpickle形式で渡すこともできる．
     - 末尾`.pkl`のpathを渡せばOK
+- 並列処理が可能な環境であれば`-tm EMMT`とすることで，ある程度高速にEMアルゴリズムの学習が可能です．
 
 ## model化
 
