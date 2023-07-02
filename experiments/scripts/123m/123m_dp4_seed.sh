@@ -16,6 +16,9 @@ export PATH=$PATH:$PYTHONUSERBASE/bin
 user_name=$(whoami)
 cd /home/$user_name/work/DeepSpeedFugaku
 
+
+SEED=99
+
 # Change for multinode config
 CPUS_PER_NODE=1
 NNODES=4
@@ -23,14 +26,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-
-LR=0.0010
-GLOBAL_BATCH_SIZE=16
-MICRO_BATCH_SIZE=$(($GLOBAL_BATCH_SIZE / $WORLD_SIZE))
-
-JOB_NAME="ja-wiki-123m_dp4_lr_${LR}_gbatch_${GLOBAL_BATCH_SIZE}"
-
-CHECKPOINT_PATH=checkpoints/${JOB_NAME}/
+CHECKPOINT_PATH=checkpoints/123m_dp4_ja_seed_${SEED}/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
@@ -56,8 +52,8 @@ mpirun $DISTRIBUTED_ARGS \
   --num-layers 12 \
   --hidden-size 768 \
   --num-attention-heads 12 \
-  --micro-batch-size $MICRO_BATCH_SIZE \
-  --global-batch-size $GLOBAL_BATCH_SIZE \
+  --micro-batch-size 1 \
+  --global-batch-size 4 \
   --seq-length 256 \
   --max-position-embeddings 256 \
   --train-iters 500000 \
@@ -70,7 +66,7 @@ mpirun $DISTRIBUTED_ARGS \
   --data-impl mmap \
   --split 949,50,1 \
   --distributed-backend mpi \
-  --lr $LR \
+  --lr 0.00015 \
   --min-lr 1.0e-5 \
   --lr-decay-style cosine \
   --weight-decay 1e-2 \
@@ -80,6 +76,7 @@ mpirun $DISTRIBUTED_ARGS \
   --save-interval 1000 \
   --eval-interval 100 \
   --eval-iters 10 \
+  --seed $SEED \
   --no-cuda \
   --checkpoint-activations \
   --use-cpu-initialization \
@@ -90,4 +87,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-batch-size-to-tensorboard \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
-  --wandb-name "fugaku-${JOB_NAME}"
+  --wandb-name "fugaku-ja-wiki-123m_dp4_seed_${SEED}"
