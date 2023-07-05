@@ -180,3 +180,6 @@ outouts/*.out
 
 .python-version
 
+
+# for mac
+.DS_Store
