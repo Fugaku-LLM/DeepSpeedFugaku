@@ -22,14 +22,14 @@ export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($SLURM_JOBID % 50000)))
 
-CHECKPOINT_PATH=checkpoints/350m_dp4/
+CHECKPOINT_PATH=checkpoints/123m_dp4_ja/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
 DATA_PATH=data/wikipedia/binarized/gpt-2/ja_wiki_text_document
 TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 
-output_path="jobs/mpi_outs/${SLURM_JOBID}_n${nodos}"
+output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES"
 
 DATA_PARALLEL_SIZE=4
@@ -45,13 +45,13 @@ export OMP_NUM_THREADS=48
 
 mpirun $DISTRIBUTED_ARGS \
   python pretrain_gpt.py \
-  --num-layers 24 \
-  --hidden-size 1024 \
-  --num-attention-heads 16 \
+  --num-layers 12 \
+  --hidden-size 768 \
+  --num-attention-heads 12 \
   --micro-batch-size 1 \
   --global-batch-size 4 \
-  --seq-length 1024 \
-  --max-position-embeddings 1024 \
+  --seq-length 256 \
+  --max-position-embeddings 256 \
   --train-iters 500000 \
   --lr-decay-iters 320000 \
   --save $CHECKPOINT_PATH \
@@ -82,4 +82,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-batch-size-to-tensorboard \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
-  --wandb-name "ylab-cpu-ja-wiki-350m_dp4"
+  --wandb-name "ylab-cpu-ja-wiki-123m_dp4"
