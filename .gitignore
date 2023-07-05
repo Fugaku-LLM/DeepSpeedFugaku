@@ -180,5 +180,11 @@ outouts/*.out
 
 .python-version
 
+<<<<<<< HEAD
 pytorch/
 DeepSpeed/
+=======
+
+# for mac
+.DS_Store
+>>>>>>> 8e6429ff023d6e52f56f2d7a67f9a0f0a6ab46b4
