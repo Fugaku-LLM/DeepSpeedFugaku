@@ -180,3 +180,5 @@ outouts/*.out
 
 .python-version
 
+pytorch/
+DeepSpeed/
