@@ -30,9 +30,9 @@ Install DeepSpeedFugaku and Python modules
     ```
     export PYTHONUSERBASE=$HOME/work/.local
     export PATH=$PATH:$PYTHONUSERBASE/bin
-    pip install --user deepspeed
-    pip install --user datasets
-    pip install --user nltk
+    pip3 install --user deepspeed
+    pip3 install --user datasets
+    pip3 install --user nltk
     ```
 6. Build DeepSpeedFugaku
     ```
