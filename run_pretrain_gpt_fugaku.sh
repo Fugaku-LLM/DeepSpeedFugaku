@@ -8,7 +8,7 @@
 #PJM -j
 #PJM -S
 
-source /vol0004/apps/oss/PyTorch-1.7.0/example/env.src
+source /data/hp190122/share/PyTorch-1.10.1/env.src
 export PYTHONUSERBASE=$HOME/work/.local
 export PATH=$PATH:$PYTHONUSERBASE/bin
 export HF_DATASETS_CACHE="$HOME/work/DeepSpeedFugaku/.cache"
@@ -17,7 +17,7 @@ CHECKPOINT_PATH=checkpoints/pretrain_gpt2/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
-DATA_PATH=codeparrot_content_document
+DATA_PATH=/data/hp190122/gpt-fugaku-data/codeparrot/codeparrot_content_document
 TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 WORLD_SIZE=4
 DISTRIBUTED_ARGS="--nproc_per_node $WORLD_SIZE \
