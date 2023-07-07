@@ -13,6 +13,10 @@ Hinadori CPU Installation
     ```
 3. download PyTorch 1.10.1
     ```bash
+    git clone git@github.com:rioyokotalab/DeepSpeedFugaku.git
+    cd DeepSpeedFugaku
+
+    git switch training/feature/benchmark-ja-wiki
     git clone --recursive https://github.com/pytorch/pytorch
     cd pytorch
 
