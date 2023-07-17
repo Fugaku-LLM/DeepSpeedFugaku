@@ -1118,6 +1118,12 @@ def training_log(
         tokens_per_sec = samples_per_sec * seq_len
         tokens_per_sec_per_replica = tokens_per_sec / args.data_parallel_size
 
+        wandb_stats["stats/tflops"] = tflops
+        wandb_stats["stats/samples_per_sec"] = samples_per_sec
+        wandb_stats["stats/samples_per_sec_per_replica"] = samples_per_sec_per_replica
+        wandb_stats["stats/tokens_per_sec"] = tokens_per_sec
+        wandb_stats["stats/tokens_per_sec_per_replica"] = tokens_per_sec_per_replica
+
         # only the last rank process has a non-None _GLOBAL_TENSORBOARD_WRITER
         if wandb_writer and is_last_rank():
             if args.log_timers_to_tensorboard:

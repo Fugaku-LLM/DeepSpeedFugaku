@@ -181,7 +181,7 @@ def _set_wandb_writer(args):
                 "entity": "gpt-fugaku",
                 "name": exp_name,
                 "config": args,
-                "project": "benchmarking-gpt",
+                "project": "ja-wiki-training",
             }
             if args.wandb_id is not None:
                 wandb_input["id"] = args.wandb_id
