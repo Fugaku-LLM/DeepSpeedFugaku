@@ -18,6 +18,7 @@ try:
     from apex.optimizers import FusedSGD as SGD
 except ImportError:
     from torch.optim import Adam
+    from torch.optim import AdamW
     from torch.optim import SGD
 
 
@@ -72,7 +73,7 @@ def get_megatron_optimizer(model):
                                        weight_decay=args.weight_decay)
     else:
         if args.optimizer == 'adam':
-            optimizer = Adam(param_groups,
+            optimizer = AdamW(param_groups,
                             lr=args.lr,
                             weight_decay=args.weight_decay,
                             betas=(args.adam_beta1, args.adam_beta2),
