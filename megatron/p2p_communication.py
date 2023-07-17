@@ -16,7 +16,7 @@
 from functools import reduce
 import operator
 import torch
-
+from deepspeed.accelerator import get_accelerator
 from megatron import get_args
 from megatron import mpu
 

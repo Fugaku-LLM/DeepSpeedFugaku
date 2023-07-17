@@ -19,7 +19,7 @@ from abc import ABC
 from abc import abstractmethod
 
 import torch
-
+from deepspeed.accelerator import get_accelerator
 
 class MegatronGradScaler(ABC):
 
@@ -128,6 +128,6 @@ class DynamicGradScaler(MegatronGradScaler):
 
 
     def load_state_dict(self, state_dict):
-        self._scale = state_dict['scale'].cuda(torch.cuda.current_device())
+        self._scale = state_dict['scale'].to(get_accelerator().current_device_name())
         self._growth_tracker = state_dict['growth_tracker']
         self._hysteresis_tracker = state_dict['hysteresis_tracker']

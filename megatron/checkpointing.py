@@ -19,7 +19,7 @@ import os
 import random
 import sys
 import numpy as np
-
+from deepspeed.accelerator import get_accelerator
 import torch
 
 from megatron import (get_args,
@@ -417,7 +417,7 @@ def load_checkpoint(model, optimizer, lr_scheduler, load_arg='load', strict=True
             random.setstate(state_dict['random_rng_state'])
             np.random.set_state(state_dict['np_rng_state'])
             torch.set_rng_state(state_dict['torch_rng_state'])
-            torch.cuda.set_rng_state(state_dict['cuda_rng_state'])
+            get_accelerator().set_rng_state(state_dict['cuda_rng_state'])
             # Check for empty states array
             if not state_dict['rng_tracker_states']:
                 raise KeyError

@@ -24,7 +24,7 @@ import torch
 from megatron.tokenizer import build_tokenizer
 from .arguments import parse_args
 from .microbatches import build_num_microbatches_calculator
-
+from deepspeed.accelerator import get_accelerator
 _GLOBAL_ARGS = None
 _GLOBAL_NUM_MICROBATCHES_CALCULATOR = None
 _GLOBAL_TOKENIZER = None

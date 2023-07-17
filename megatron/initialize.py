@@ -21,7 +21,6 @@ import time
 
 import numpy as np
 import torch
-
 from megatron import fused_kernels
 from megatron import get_adlr_autoresume
 from megatron import get_args
@@ -30,7 +29,7 @@ from megatron import mpu
 from megatron.global_vars import set_global_variables
 from megatron.mpu import (set_tensor_model_parallel_rank,
                           set_tensor_model_parallel_world_size)
-
+from deepspeed.accelerator import get_accelerator
 import deepspeed
 import deepspeed.utils.groups as groups
 
@@ -109,7 +108,6 @@ def _compile_dependencies():
         compile_helper()
         print('>>> done with dataset index builder. Compilation time: {:.3f} '
               'seconds'.format(time.time() - start_time), flush=True)
-
     # ==================
     # Load fused kernels
     # ==================
@@ -136,7 +134,7 @@ def _compile_dependencies():
     if _is_rank_0():
         start_time = time.time()
         print('> compiling and loading fused kernels ...', flush=True)
-        if torch.cuda.device_count() > 0: # Skip when CPU-only
+        if get_accelerator().device_count() > 0: # Skip when CPU-only
             fused_kernels.load(args)
         torch.distributed.barrier()
     else:
@@ -255,14 +253,14 @@ def _set_random_seed(seed_):
     if seed_ is not None and seed_ > 0:
         # Ensure that different pipeline MP stages get different seeds.
         # No need to do so for CPU-only case.
-        if torch.cuda.device_count() == 0:
+        if get_accelerator().device_count() == 0:
             seed = seed_
         else:
             seed = seed_ + (100 * mpu.get_pipeline_model_parallel_rank())
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
-        if torch.cuda.device_count() > 0:
+        if get_accelerator().device_count() > 0:
             mpu.model_parallel_cuda_manual_seed(seed)
     else:
         raise ValueError('Seed ({}) should be a positive integer.'.format(seed))
@@ -290,7 +288,7 @@ def _is_rank_0():
     """Check whether it is rank 0. For AML, check if it is rank 0 of a node"""
     if torch.distributed.is_initialized():
         if torch.distributed.get_rank() == 0 or (
-            'AZUREML_EXPERIMENT_ID' in os.environ and torch.distributed.get_rank() % torch.cuda.device_count() == 0
+            'AZUREML_EXPERIMENT_ID' in os.environ and torch.distributed.get_rank() % get_accelerator().device_count() == 0
             ):
             return True
         else:

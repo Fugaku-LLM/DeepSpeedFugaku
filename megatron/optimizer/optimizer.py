@@ -30,7 +30,7 @@ except ImportError:
 from megatron import get_timers
 from megatron import mpu
 from megatron import print_rank_0
-
+from deepspeed.accelerator import get_accelerator
 from .clip_grads import clip_grad_norm_fp32, count_zeros_fp32
 
 
@@ -270,11 +270,12 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
                         param_group['params'][i] = param
 
                     else:
+                        device_name = get_accelerator().device_name()
                         raise TypeError('Wrapped parameters must be one of '
-                                        'torch.cuda.FloatTensor,  '
-                                        'torch.cuda.HalfTensor, or '
-                                        'torch.cuda.BFloat16Tensor. '
-                                        'Received {}'.format(param.type()))
+                                        'torch.{}.FloatTensor,  '
+                                        'torch.{}.HalfTensor, or '
+                                        'torch.{}.BFloat16Tensor. '
+                                        'Received {}'.format(device_name,device_name,device_name,param.type()))
 
             self.float16_groups.append(float16_params_this_group)
             self.fp32_from_float16_groups.append(

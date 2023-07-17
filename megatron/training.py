@@ -54,7 +54,7 @@ from megatron.schedules import forward_backward_no_pipelining
 from megatron.schedules import forward_backward_pipelining_without_interleaving
 from megatron.schedules import forward_backward_pipelining_with_interleaving
 from megatron.utils import report_memory, throughput_calculator, checkpoint_throughput_calculator
-
+from deepspeed.accelerator import get_accelerator
 import deepspeed
 from deepspeed.compression.compress import init_compression, redundancy_clean
 
@@ -531,6 +531,7 @@ def setup_model_and_optimizer(
                 # Number of train/valid/test samples.
                 if args.train_samples:
                     train_samples = args.train_samples
+                    update_train_iters(args)
                 else:
                     train_samples = args.train_iters * args.global_batch_size
                 # eval_iters and test_iters here are not actually used, only for
@@ -1522,6 +1523,7 @@ def build_train_valid_test_data_iterators(build_train_valid_test_datasets_provid
         # Number of train/valid/test samples.
         if args.train_samples:
             train_samples = args.train_samples
+            update_train_iters(args)
         else:
             train_samples = args.train_iters * args.global_batch_size
         eval_iters = (args.train_iters // args.eval_interval + 1) * args.eval_iters

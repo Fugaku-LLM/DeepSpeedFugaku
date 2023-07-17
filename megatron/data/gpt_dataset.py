@@ -20,7 +20,7 @@ import time
 
 import numpy as np
 import torch
-
+from deepspeed.accelerator import get_accelerator
 from megatron import mpu, is_rank_0, print_rank_0, get_args
 from megatron.data.blendable_dataset import BlendableDataset
 from megatron.data.dataset_utils import get_datasets_weights_and_num_samples

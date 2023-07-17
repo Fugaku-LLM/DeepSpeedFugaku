@@ -36,6 +36,7 @@ from torch.nn.parallel.distributed import DistributedDataParallel as torchDDP
 from megatron.model.distributed import DistributedDataParallel as LocalDDP
 from megatron.model.module import Float16Module
 from deepspeed.runtime.pipe import schedule
+from deepspeed.accelerator import get_accelerator
 
 class EvalHarnessAdaptor(GPT2LM):
     def __init__(self, model, tokenizer):
@@ -55,7 +56,7 @@ class EvalHarnessAdaptor(GPT2LM):
         self.cache_hook = CacheHook(None)
         self.is_main = args.rank == 0
         self.is_local_main = args.local_rank == 0
-        self._device = torch.cuda.current_device()
+        self._device = get_accelerator().current_device_name()
         self.is_model_parallel = mpu.get_tensor_model_parallel_world_size() > 1
         self.is_pipe_parallel = mpu.get_pipeline_model_parallel_world_size() > 1
         self.is_data_parallel = mpu.get_data_parallel_world_size() > 1
@@ -330,7 +331,7 @@ def load_ds_checkpoint_and_setup_megatron(extra_args_provider):
     cp_args = ds_checkpoint.get_args()
     # Merge the current args with the checkpoint args.
     skip_keys = ['world_size', 'rank', 'local_rank','device_count', 'micro_batch_size','global_batch_size', 'batch_size', 'tensorboard_dir', 'deepspeed', 'deepspeed_config',
-                     'data_parallel_size', 'pipeline_model_parallel_size', 'tensor_model_parallel_size', 'moe_expert_parallel_size', 'moe_token_dropping', 'load', 'rampup_batch_size', 'iteration', 'inference']
+                     'data_parallel_size', 'pipeline_model_parallel_size', 'tensor_model_parallel_size', 'moe_expert_parallel_size', 'moe_token_dropping', 'load', 'rampup_batch_size', 'iteration', 'inference', 'random_ltd']
 
     skip_if_specified = ['merge_file', 'vocab_file']
 

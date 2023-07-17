@@ -37,7 +37,7 @@ from megatron import mpu
 from megatron.model.module import param_is_not_shared
 from megatron.mpu.layers import param_is_not_tensor_parallel_duplicate
 from megatron import get_num_microbatches
-
+from deepspeed.accelerator import get_accelerator
 def unwrap_model(model, module_instances=(torchDDP)):
     return_list = True
     if not isinstance(model, list):

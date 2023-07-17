@@ -16,7 +16,13 @@
 """Gradient clipping."""
 
 import torch
-from torch._six import inf
+
+try:
+    from torch._six import inf as inf
+except ModuleNotFoundError:
+    from torch import inf as inf
+
+from deepspeed.accelerator import get_accelerator
 
 try:
     from apex.multi_tensor_apply import multi_tensor_applier
@@ -28,7 +34,7 @@ except ImportError:
 from megatron import mpu
 from megatron.model.module import param_is_not_shared
 from megatron.mpu.layers import param_is_not_tensor_parallel_duplicate
-
+from deepspeed.accelerator import get_accelerator
 
 def clip_grad_norm_fp32(parameters, max_norm, norm_type=2):
     """Clips gradient norm of an iterable of parameters whose gradients
@@ -100,7 +106,6 @@ def clip_grad_norm_fp32(parameters, max_norm, norm_type=2):
             # Since we will be summing across data parallel groups,
             # we need the pow(norm-type).
             total_norm = grad_norm ** norm_type
-
         else:
             for grad in grads_for_norm:
                 grad_norm = torch.norm(grad, norm_type)
