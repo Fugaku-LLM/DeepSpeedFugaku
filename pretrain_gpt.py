@@ -341,6 +341,7 @@ def git_ds_info():
 
 
 if __name__ == "__main__":
+    torch.set_flush_denormal(True)
     git_ds_info()
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
              args_defaults={'tokenizer_type': 'GPT2BPETokenizer'},
