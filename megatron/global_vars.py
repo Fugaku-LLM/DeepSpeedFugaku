@@ -290,5 +290,6 @@ class Timers:
             rank = torch.distributed.get_rank()
         else:
             rank = 0
-        with open(f'timer/timer.{rank:06d}', 'a') as f:
+        timer_dir_name = os.environ.get('TIMER', '')
+        with open(f'{timer_dir_name}/timer.{rank:06d}', 'a') as f:
             f.write(string + '\n')
