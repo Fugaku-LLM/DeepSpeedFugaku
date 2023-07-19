@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=large"
-#PJM -L elapse=1:00:00
+#PJM -L elapse=24:00:00
 #PJM -L "node=1024"
 #PJM --mpi "proc=1024"
 #PJM --mpi "max-proc-per-node=1"
@@ -12,7 +12,9 @@
 source /data/hp190122/share/PyTorch-1.10.1/env.src
 export PYTHONUSERBASE=$HOME/work/.local
 export PATH=$PATH:$PYTHONUSERBASE/bin
-cd /home/u11078/work/DeepSpeedFugaku
+
+user_name=$(whoami)
+cd /home/$user_name/work/DeepSpeedFugaku
 
 # Change for multinode config
 CPUS_PER_NODE=1
@@ -25,12 +27,14 @@ CHECKPOINT_PATH=checkpoints/1_3b_mp4_dp256/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
-DATA_PATH=data/codeparrot/codeparrot_content_document
+DATA_PATH=data/wikipedia/binarized/gpt-2/ja_wiki_text_document
 TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 
 output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES -std-proc ${output_path}/stdproc"
+
 DATA_PARALLEL_SIZE=256
+
 PIPELINE_MODEL_PARALLEL_SIZE=1
 TENSOR_MODEL_PARALLEL_SIZE=4
 PIPELINE_PARALLEL_ARGS="--pipeline-model-parallel-size $PIPELINE_MODEL_PARALLEL_SIZE"
@@ -41,7 +45,7 @@ PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 export OMP_NUM_THREADS=48
 
 mpirun $DISTRIBUTED_ARGS \
-python pretrain_gpt.py \
+    python pretrain_gpt.py \
     --num-layers 24 \
     --hidden-size 2048 \
     --num-attention-heads 32 \
@@ -74,4 +78,9 @@ python pretrain_gpt.py \
     --num-workers 0 \
     --no-load-rng \
     $PARALLEL_ARGS \
-    $TENSORBOARD_ARGS
+    $TENSORBOARD_ARGS \
+    --log-batch-size-to-tensorboard \
+    --log-validation-ppl-to-tensorboard \
+    --log-timers-to-tensorboard \
+    --log-optimizer-states-to-tensorboard \
+    --wandb-name "ja-wiki-1_3b_dp256_tp4_fp32"
