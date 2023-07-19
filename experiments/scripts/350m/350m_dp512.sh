@@ -23,7 +23,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=checkpoints/350m_dp512_fp32/
+CHECKPOINT_PATH=checkpoints/350m_dp512_fp32-GPT2-BPTokenizer/
 INPUT_PREFIX=dataset
 VOCAB_FILE=gpt2-vocab.json
 MERGE_FILE=gpt2-merges.txt
@@ -72,7 +72,7 @@ mpirun $DISTRIBUTED_ARGS \
   --clip-grad 1.0 \
   --lr-warmup-fraction .01 \
   --log-interval 1 \
-  --save-interval 300 \
+  --save-interval 1000 \
   --eval-interval 100 \
   --eval-iters 10 \
   --no-cuda \
@@ -86,4 +86,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
-  --wandb-name "ja-wiki-350m_dp512_fp32"
+  --wandb-name "fugaku-350m_dp512_GPT2BPTokenizer"
