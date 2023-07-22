@@ -53,7 +53,7 @@ mpirun $DISTRIBUTED_ARGS \
     --hidden-size 5120 \
     --num-attention-heads 40 \
     --micro-batch-size 1 \
-    --global-batch-size 16 \
+    --global-batch-size 32 \
     --seq-length 1024 \
     --max-position-embeddings 1024 \
     --train-iters 100 \
