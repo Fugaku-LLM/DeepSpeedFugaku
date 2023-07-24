@@ -21,6 +21,7 @@ from itertools import accumulate
 
 import numpy as np
 import torch
+from megatron import get_timers
 from megatron import print_rank_0
 
 
@@ -540,12 +541,15 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
 
         get(idx) is the same as [idx] but get() does not support slicing.
         """
+        timers = get_timers()
         ptr, size = self._index[idx]
         if length is None:
             length = size - offset
         ptr += offset * np.dtype(self._index.dtype).itemsize
+        timers('frombuffer').start()
         np_array = np.frombuffer(self._bin_buffer, dtype=self._index.dtype,
                                  count=length, offset=ptr)
+        timers('frombuffer').stop()
         return np_array
 
     @property

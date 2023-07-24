@@ -15,6 +15,8 @@
 
 import torch
 
+from megatron import get_timers
+
 torch._C._jit_set_profiling_mode(False)
 torch._C._jit_set_profiling_executor(False)
 torch._C._jit_override_can_fuse_on_cpu(True)
@@ -48,8 +50,14 @@ class GeLUFunction(torch.autograd.Function):
     @staticmethod
     # bias is an optional argument
     def forward(ctx, input, bias):
+        timers = get_timers()
+        timers('save_for_backward').start()
         ctx.save_for_backward(input, bias)
-        return bias_gelu(bias, input)
+        timers('save_for_backward').stop()
+        timers('bias_gelu').start()
+        result = bias_gelu(bias, input)
+        timers('bias_gelu').stop()
+        return result
 
     @staticmethod
     def backward(ctx, grad_output):

@@ -653,18 +653,22 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
         # calculation in forward pass. Users do not need to set it in the
         # command line to use kd.
         args.teacher_forward = True
+    timers('forward_backward').start()
     losses_reduced = forward_backward_func(
         forward_step_func, data_iterator, model, optimizer, timers, forward_only=False
     )
+    timers('forward_backward').stop()
     if args.mos or args.kd:
         args.teacher_forward = False
 
     # All-reduce if needed.
+    timers('allreduce_params').start()
     if not args.deepspeed and args.DDP_impl == "local":
         timers("backward-params-all-reduce").start()
         for model_module in model:
             model_module.allreduce_gradients()
         timers("backward-params-all-reduce").stop()
+    timers('allreduce_params').stop()
 
     # All-reduce word_embeddings' grad across first and last stages to ensure
     # that word_embeddings parameters stay in sync.
@@ -1194,6 +1198,65 @@ def training_log(
             report_memory_flag = False
         timers.log(timers_to_log, normalizer=args.log_interval)
 
+        # Output timer data to file
+        timers_to_out = []
+        def add_to_out(name):
+            if name in timers.timers:
+                timers_to_out.append(name)
+        add_to_out('iteration')
+        add_to_out('train_step')
+        add_to_out('forward_backward')
+        add_to_out('forward_step')
+        add_to_out('get_tokenizer')
+        add_to_out('next')
+        add_to_out('gptdataset_shuffle_idx')
+        add_to_out('gptdataset_pre')
+        add_to_out('gptdataset_get')
+        add_to_out('frombuffer')
+        add_to_out('gptdataset_otherwise')
+        add_to_out('gptdataset_dict1')
+        add_to_out('gptdataset_dict2')
+        add_to_out('broadcast_data')
+        add_to_out('_build_key_size_numel_dictionaries')
+        add_to_out('pack')
+        add_to_out('broadcast')
+        add_to_out('unpack')
+        add_to_out('long')
+        add_to_out('contiguous_labels')
+        add_to_out('contiguous_tokens')
+        add_to_out('get_ltor_masks_and_position_ids')
+        add_to_out('forward-compute')
+        add_to_out('unwrap_model')
+        add_to_out('set_input_tensor')
+        add_to_out('forward_step_func')
+        add_to_out('pipeline_last_stage')
+        add_to_out('loss_func')
+        add_to_out('average_losses_across_data_parallel_group')
+        add_to_out('encoder')
+        add_to_out('attention')
+        add_to_out('qkv')
+        add_to_out('adjust_key_value')
+        add_to_out('raw_attention_scores')
+        add_to_out('baddbmm')
+        add_to_out('update_attention_mask')
+        add_to_out('scale_mask_softmax')
+        add_to_out('attention_dropout')
+        add_to_out('context_layer')
+        add_to_out('bmm')
+        add_to_out('dense')
+        add_to_out('row_par_lin_mm')
+        add_to_out('row_par_lin_allreduce')
+        add_to_out('mlp')
+        add_to_out('dense_h_to_4h')
+        add_to_out('activation_func')
+        add_to_out('save_for_backward')
+        add_to_out('bias_gelu')
+        add_to_out('dense_4h_to_h')
+        add_to_out('backward_step')
+        add_to_out('backward-compute')
+        add_to_out('allreduce_params')
+        timers.out(timers_to_out, normalizer=args.log_interval)
+
     return report_memory_flag
 
 
@@ -1243,6 +1306,7 @@ def train(
         assert model[0].random_ltd_enabled()
         args.random_ltd_layer_num = model[0].random_ltd_scheduler.get_random_ltd_layer_num()
 
+    timers('iteration').start()
     while iteration < args.train_iters and (
         args.train_tokens is None or args.consumed_train_tokens < args.train_tokens
     ):
@@ -1258,9 +1322,11 @@ def train(
             args.curriculum_seqlen = args.curriculum_scheduler.update_difficulty(
                 args.iteration + 1
             )
+        timers('train_step').start()
         loss_dict, skipped_iter, grad_norm, num_zeros_in_grad = train_step(
             forward_step_func, train_data_iterator, model, optimizer, lr_scheduler
         )
+        timers('train_step').stop()
         iteration += 1
         args.iteration = iteration
         new_samples = (
@@ -1352,6 +1418,7 @@ def train(
             torch.distributed.barrier()
             print_datetime("exiting program at iteration {}".format(iteration))
             sys.exit()
+    timers('iteration').stop()
 
     return iteration
 

@@ -21,6 +21,7 @@ import time
 import numpy as np
 import torch
 from deepspeed.accelerator import get_accelerator
+from megatron import get_timers
 from megatron import mpu, is_rank_0, print_rank_0, get_args
 from megatron.data.blendable_dataset import BlendableDataset
 from megatron.data.dataset_utils import get_datasets_weights_and_num_samples
@@ -159,21 +160,29 @@ class GPTDataset(torch.utils.data.Dataset):
         return self.sample_idx.shape[0] - 1
 
     def __getitem__(self, idx):
+        timers = get_timers()
         args = get_args()
         orig_idx = idx
         # Get the shuffled index.
+        timers('gptdataset_shuffle_idx').start()
         idx = self.shuffle_idx[idx]
+        timers('gptdataset_shuffle_idx').stop()
         # Start and end documents and offsets.
+        timers('gptdataset_pre').start()
         doc_index_f = self.sample_idx[idx][0]
         doc_index_l = self.sample_idx[idx + 1][0]
         offset_f = self.sample_idx[idx][1]
         offset_l = self.sample_idx[idx + 1][1]
+        timers('gptdataset_pre').stop()
         # If we are within the same document, just extract the chunk.
         if doc_index_f == doc_index_l:
+            timers('gptdataset_get').start()
             sample = self.indexed_dataset.get(self.doc_idx[doc_index_f],
                                               offset=offset_f,
                                               length=offset_l - offset_f + 1)
+            timers('gptdataset_get').stop()
         else:
+            timers('gptdataset_otherwise').start()
             # Otherwise, get the rest of the initial document.
             sample_list = [self.indexed_dataset.get(self.doc_idx[doc_index_f],
                                                     offset=offset_f)]
@@ -185,9 +194,16 @@ class GPTDataset(torch.utils.data.Dataset):
                 self.doc_idx[doc_index_l],
                 length=offset_l + 1))
             sample = np.concatenate(sample_list)
+            timers('gptdataset_otherwise').stop()
         if args.return_data_index:
-            return {'text': np.array(sample, dtype=np.int64), 'index': np.array([orig_idx], dtype=np.int64)}
-        return {'text': np.array(sample, dtype=np.int64)}
+            timers('gptdataset_dict1').start()
+            ret = {'text': np.array(sample, dtype=np.int64), 'index': np.array([orig_idx], dtype=np.int64)}
+            timers('gptdataset_dict1').stop()
+            return ret
+        timers('gptdataset_dict2').start()
+        ret = {'text': np.array(sample, dtype=np.int64)}
+        timers('gptdataset_dict2').stop()
+        return ret
 
 
 def _build_index_mappings(name, data_prefix, documents, sizes,

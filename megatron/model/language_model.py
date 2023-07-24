@@ -19,6 +19,7 @@ import torch
 import torch.nn.functional as F
 
 from megatron import get_args
+from megatron import get_timers
 from megatron import mpu
 from .module import MegatronModule
 from megatron.model.enums import LayerType, AttnMaskType
@@ -376,6 +377,8 @@ class TransformerLanguageModel(MegatronModule):
                 get_key_value=False, pooling_sequence_index=0,
                 enc_hidden_states=None, output_enc_hidden=False):
 
+        timers = get_timers()
+
         # Embeddings.
         if self.pre_process:
             embedding_output = self.embedding(enc_input_ids, enc_position_ids,
@@ -385,6 +388,7 @@ class TransformerLanguageModel(MegatronModule):
             encoder_input = None
 
         # encoder.
+        timers('encoder').start()
         if enc_hidden_states is None:
             encoder_output, *moe_losses = self.encoder(encoder_input,
                                           enc_attn_mask,
@@ -393,6 +397,7 @@ class TransformerLanguageModel(MegatronModule):
         else:
             encoder_output = enc_hidden_states.to(encoder_input.dtype)
             moe_losses = []
+        timers('encoder').stop()
 
         if self.post_process:
             if self.add_pooler:
