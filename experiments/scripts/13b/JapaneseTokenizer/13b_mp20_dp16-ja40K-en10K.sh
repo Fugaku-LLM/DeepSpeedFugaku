@@ -56,7 +56,7 @@ mpirun $DISTRIBUTED_ARGS \
     --global-batch-size 16 \
     --seq-length 1024 \
     --max-position-embeddings 1024 \
-    --train-iters 100 \
+    --train-iters 500000 \
     --lr-decay-iters 320000 \
     --save $CHECKPOINT_PATH \
     --load $CHECKPOINT_PATH \
