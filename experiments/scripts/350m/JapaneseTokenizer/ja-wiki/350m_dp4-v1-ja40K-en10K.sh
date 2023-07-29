@@ -16,8 +16,8 @@ export PATH=$PATH:$PYTHONUSERBASE/bin
 user_name=$(whoami)
 cd /home/$user_name/work/DeepSpeedFugaku
 
-JA_VOCAB_SIZE=10
-EN_VOCAB_SIZE=40
+JA_VOCAB_SIZE=40
+EN_VOCAB_SIZE=10
 
 # Change for multinode config
 CPUS_PER_NODE=1
@@ -26,7 +26,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=checkpoints/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K
+CHECKPOINT_PATH=checkpoints/ja-wiki/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K
 INPUT_PREFIX=dataset
 VOCAB_FILE=tokenizer/models/cc100ja1GB_cc100en1GB/cc100_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K.symbolRemoved.vocab.reestimated.model
 DATA_PATH=data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/ja_wiki_text_document

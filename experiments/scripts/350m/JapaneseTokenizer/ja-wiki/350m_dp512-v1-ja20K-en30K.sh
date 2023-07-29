@@ -1,8 +1,8 @@
 #!/bin/bash -x
-#PJM -L "rscunit=rscunit_ft01,rscgrp=small"
-#PJM -L elapse=48:00:00
-#PJM -L "node=4"
-#PJM --mpi "proc=4"
+#PJM -L "rscunit=rscunit_ft01,rscgrp=large"
+#PJM -L elapse=24:00:00
+#PJM -L "node=512"
+#PJM --mpi "proc=512"
 #PJM --mpi "max-proc-per-node=1"
 #PJM -g hp190122
 #PJM -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
@@ -21,12 +21,12 @@ EN_VOCAB_SIZE=30
 
 # Change for multinode config
 CPUS_PER_NODE=1
-NNODES=4
+NNODES=512
 NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=checkpoints/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K
+CHECKPOINT_PATH=checkpoints/ja-wiki/350m_dp512_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K
 INPUT_PREFIX=dataset
 VOCAB_FILE=tokenizer/models/cc100ja1GB_cc100en1GB/cc100_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K.symbolRemoved.vocab.reestimated.model
 DATA_PATH=data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/ja_wiki_text_document
@@ -35,7 +35,7 @@ TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 output_path="jobs/mpi_outs/${PJM_JOBID}_n${nodos}"
 DISTRIBUTED_ARGS="-np $NNODES -std-proc ${output_path}/stdproc"
 
-DATA_PARALLEL_SIZE=4
+DATA_PARALLEL_SIZE=512
 
 PIPELINE_MODEL_PARALLEL_SIZE=1
 TENSOR_MODEL_PARALLEL_SIZE=1
@@ -52,7 +52,7 @@ mpirun $DISTRIBUTED_ARGS \
   --hidden-size 1024 \
   --num-attention-heads 16 \
   --micro-batch-size 1 \
-  --global-batch-size 4 \
+  --global-batch-size 512 \
   --seq-length 1024 \
   --max-position-embeddings 1024 \
   --train-iters 500000 \
@@ -85,4 +85,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-batch-size-to-tensorboard \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
-  --wandb-name "ja-wiki-350m_dp4-v1-ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K"
+  --wandb-name "ja-wiki-350m_dp512-v1-ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K"
