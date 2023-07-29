@@ -26,7 +26,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=checkpoints/ja-en-wiki/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K/ja-en-wiki
+CHECKPOINT_PATH=checkpoints/ja-en-wiki/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K
 INPUT_PREFIX=dataset
 VOCAB_FILE=tokenizer/models/cc100ja1GB_cc100en1GB/cc100_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K.symbolRemoved.vocab.reestimated.model
 
