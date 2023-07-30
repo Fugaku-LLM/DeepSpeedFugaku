@@ -15,6 +15,7 @@
 
 """Pretrain GPT"""
 
+import argparse
 import torch
 import math
 from functools import partial
@@ -90,11 +91,16 @@ def model_provider(pre_process=True, post_process=True):
 
 def get_batch(data_iterator):
     """Generate a batch"""
-    args = get_args()
+    args: argparse.Namespace = get_args()
     timers = get_timers()
-    timers('get_tokenizer').start()
+
+    if args.use_timer:
+        timers('get_tokenizer').start()
+    # timer start
     tokenizer = get_tokenizer()
-    timers('get_tokenizer').stop()
+    # timer end
+    if args.use_timer:
+        timers('get_tokenizer').stop()
 
     # Items and their type.
     keys = ['text']
@@ -102,35 +108,62 @@ def get_batch(data_iterator):
 
     # Broadcast data.
     if data_iterator is not None:
-        timers('next').start()
+        if args.use_timer:
+            timers('next').start()
+        # timer start
         data = next(data_iterator)
-        timers('next').stop()
+        # timer end
+        if args.use_timer:
+            timers('next').stop()
     else:
         data = None
-    timers('broadcast_data').start()
+
+    if args.use_timer:
+        timers('broadcast_data').start()
+    # timer start
     data_b = mpu.broadcast_data(keys, data, datatype)
-    timers('broadcast_data').stop()
+    # timer end
+    if args.use_timer:
+        timers('broadcast_data').stop()
 
     # Unpack.
-    timers('long').start()
+    if args.use_timer:
+        timers('long').start()
+    # timer start
     tokens_ = data_b['text'].long()
-    timers('long').stop()
-    timers('contiguous_labels').start()
+    # timer end
+    if args.use_timer:
+        timers('long').stop()
+
+    if args.use_timer:
+        timers('contiguous_labels').start()
+    # timer start
     labels = tokens_[:, 1:].contiguous()
-    timers('contiguous_labels').stop()
-    timers('contiguous_tokens').start()
+    # timer end
+    if args.use_timer:
+        timers('contiguous_labels').stop()
+
+    if args.use_timer:
+        timers('contiguous_tokens').start()
+    # timer start
     tokens = tokens_[:, :-1].contiguous()
-    timers('contiguous_tokens').stop()
+    # timer end
+    if args.use_timer:
+        timers('contiguous_tokens').stop()
 
     # Get the masks and postition ids.
-    timers('get_ltor_masks_and_position_ids').start()
+    if args.use_timer:
+        timers('get_ltor_masks_and_position_ids').start()
+    # timer start
     attention_mask, loss_mask, position_ids = get_ltor_masks_and_position_ids(
         tokens,
         tokenizer.eod,
         args.reset_position_ids,
         args.reset_attention_mask,
         args.eod_mask_loss)
-    timers('get_ltor_masks_and_position_ids').stop()
+    # timer end
+    if args.use_timer:
+        timers('get_ltor_masks_and_position_ids').stop()
 
     return tokens, labels, loss_mask, attention_mask, position_ids
 
@@ -198,14 +231,20 @@ def get_batch_pipe(data):
 def loss_func(loss_mask, moe_loss, mos_loss, output_tensor):
     args = get_args()
     timers = get_timers()
+
     losses = output_tensor.float()
     loss_mask = loss_mask.view(-1).float()
     loss = torch.sum(losses.view(-1) * loss_mask) / loss_mask.sum()
-    
+
     # Reduce loss for logging.
-    timers('average_losses_across_data_parallel_group').start()
+    if args.use_timer:
+        timers('average_losses_across_data_parallel_group').start()
+    # timer start
     averaged_loss = average_losses_across_data_parallel_group([loss])
-    timers('average_losses_across_data_parallel_group').stop()
+    # timer end
+    if args.use_timer:
+        timers('average_losses_across_data_parallel_group').stop()
+
     if args.mos or args.kd:
         # assert max(args.num_experts) >= 1
         loss = loss + moe_loss + mos_loss
@@ -226,7 +265,7 @@ def calculate_mos_loss(args, stu_output, teacher_model, tokens, position_ids, at
     alpha = args.kd_alpha_ce
     beta = args.kd_beta_ce
     kd_temp = args.kd_temp
-    
+
     if teacher_model:
         with torch.no_grad():
             if args.curriculum_learning_legacy and args.curriculum_seqlen < args.seq_length:
@@ -253,10 +292,14 @@ def forward_step(data_iterator, model):
     timers = get_timers()
 
     # Get the batch.
-    timers('batch-generator').start()
+    if args.use_timer:
+        timers('batch-generator').start()
+    # timer start
     tokens, labels, loss_mask, attention_mask, position_ids = get_batch(
         data_iterator)
-    timers('batch-generator').stop()
+    # timer end
+    if args.use_timer:
+        timers('batch-generator').stop()
 
     if args.data_efficiency_curriculum_learning:
         args.curriculum_seqlen = tokens.size()[1]
@@ -289,7 +332,7 @@ def forward_step(data_iterator, model):
         if args.teacher_forward and args.teacher_model is not None:
             mos_loss = calculate_mos_loss(args, stu_output,
                 args.teacher_model[0], tokens, position_ids, attention_mask)
-    
+
     # Output_tensor stores the standard loss, loos_func calculates the total loss.
     return output_tensor, partial(loss_func, loss_mask, moe_loss, mos_loss)
 
@@ -341,8 +384,6 @@ def git_ds_info():
 
 
 if __name__ == "__main__":
-    torch.set_flush_denormal(True)
-    os.makedirs(os.environ.get('TIMER', 'timer'), exist_ok=True)
     git_ds_info()
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
              args_defaults={'tokenizer_type': 'GPT2BPETokenizer'},
