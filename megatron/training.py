@@ -149,24 +149,23 @@ def pretrain(
             args.compression_training = True
 
     # Model, optimizer, and learning rate.
-    if args.use_timer:
-        timers("model-and-optimizer-setup").start()
-    # timer start
+
+    # default timers
+    timers("model-and-optimizer-setup").start()
     model, optimizer, lr_scheduler = setup_model_and_optimizer(
         model_provider,
         teacher=False,
         data_post_process=data_post_process,
         build_train_valid_test_datasets_provider=train_valid_test_dataset_provider,
     )
-    # timer end
-    if args.use_timer:
-        timers("model-and-optimizer-setup").stop()
+    # default timers
+    timers("model-and-optimizer-setup").stop()
     print_datetime("after model, optimizer, and learning rate " "scheduler are built")
 
     # Data stuff.
-    if args.use_timer:
-        timers("train/valid/test-data-iterators-setup").start()
-    # timer start
+
+    # default timers
+    timers("train/valid/test-data-iterators-setup").start()
     if args.virtual_pipeline_model_parallel_size is not None:
         all_data_iterators = [
             build_train_valid_test_data_iterators(train_valid_test_dataset_provider)
@@ -193,9 +192,8 @@ def pretrain(
             args.deepspeed_dataloader = None
         else:
             train_data_iterator = None
-    # timer end
-    if args.use_timer:
-        timers("train/valid/test-data-iterators-setup").stop()
+    # default timers
+    timers("train/valid/test-data-iterators-setup").stop()
     print_datetime("after dataloaders are built")
 
     # args.teacher_model is used as global variable to pass the teacher model
@@ -208,8 +206,8 @@ def pretrain(
 
     # Print setup timing.
     print_rank_0("done with setup ...")
-    if args.use_timer:
-        timers.log(["model-and-optimizer-setup", "train/valid/test-data-iterators-setup"])
+    # default timers
+    timers.log(["model-and-optimizer-setup", "train/valid/test-data-iterators-setup"])
     print_rank_0("training ...")
 
     iteration = 0
@@ -689,14 +687,14 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
         timers('allreduce_params').start()
     # timer start
     if not args.deepspeed and args.DDP_impl == "local":
-        if args.use_timer:
-            timers("backward-params-all-reduce").start()
+        # default timers
+        timers("backward-params-all-reduce").start()
 
         for model_module in model:
             model_module.allreduce_gradients()
 
-        if args.use_timer:
-            timers("backward-params-all-reduce").stop()
+        # default timers
+        timers("backward-params-all-reduce").stop()
     # timer end
     if args.use_timer:
         timers('allreduce_params').stop()
@@ -705,9 +703,9 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
     # that word_embeddings parameters stay in sync.
     # This should only run for models that support pipelined model parallelism
     # (BERT and GPT-2).
-    if args.use_timer:
-        timers("backward-embedding-all-reduce").start()
-    # timer start
+
+    # default timers
+    timers("backward-embedding-all-reduce").start()
     if not args.deepspeed:
         if (
             mpu.is_pipeline_first_stage(ignore_virtual=True)
@@ -726,23 +724,20 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
                 else:
                     grad = word_embeddings_weight.grad
                 torch.distributed.all_reduce(grad, group=mpu.get_embedding_group())
-    # timer end
-    if args.use_timer:
-        timers("backward-embedding-all-reduce").stop()
+    # default timers
+    timers("backward-embedding-all-reduce").stop()
 
     # Update parameters.
-    if args.use_timer:
-        timers("optimizer").start()
-    # timer start
+    # default timers
+    timers("optimizer").start()
     if args.deepspeed:
         increment = get_num_microbatches() * args.micro_batch_size * args.data_parallel_size
         model[0].step(lr_kwargs={"increment": increment})
         update_successful = model[0].was_step_applied()
     else:
         update_successful, grad_norm, num_zeros_in_grad = optimizer.step()
-    # timer end
-    if args.use_timer:
-        timers("optimizer").stop()
+    # default timers
+    timers("optimizer").stop()
 
     # Update learning rate.
     if args.deepspeed:
@@ -1254,12 +1249,12 @@ def save_checkpoint_and_time(iteration, model, optimizer, lr_scheduler):
     # all ranks report the max time.
     torch.distributed.barrier()
 
-    if args.use_timer:
-        timers("save-checkpoint").start()
+    # default timers
+    timers("save-checkpoint").start()
     save_checkpoint(iteration, model, optimizer, lr_scheduler)
     torch.distributed.barrier()
-    if args.use_timer:
-        timers("save-checkpoint").stop()
+    # default timers
+    timers("save-checkpoint").stop()
 
     checkpoint_throughput_calculator(model, timers("save-checkpoint").elapsed(reset=False))
     timers.log(["save-checkpoint"])
@@ -1291,8 +1286,8 @@ def train(
     # Iterations.
     iteration = args.iteration
 
-    if args.use_timer:
-        timers("interval-time").start()
+    # default timers
+    timers("interval-time").start()
     print_datetime("before the start of training step")
     report_memory_flag = True
     if args.random_ltd:

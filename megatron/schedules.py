@@ -50,8 +50,9 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
 
     args = get_args()
 
+    # default timers
+    timers('forward-compute').start()
     if args.use_timer:
-        timers('forward-compute').start()
         timers('unwrap_model').start()
     unwrapped_model = unwrap_model(
         model, (torchDDP, LocalDDP, Float16Module))
@@ -94,8 +95,8 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
     if args.use_timer:
         timers('pipeline_last_stage').stop()
 
-    if args.use_timer:
-        timers('forward-compute').stop()
+    # default timers
+    timers('forward-compute').stop()
 
     return output_tensor
 
@@ -114,8 +115,8 @@ def backward_step(optimizer, input_tensor, output_tensor, output_tensor_grad, mo
         assert model is not None
 
     timers = get_timers()
-    if args.use_timer:
-        timers('backward-compute').start()
+    # default timers
+    timers('backward-compute').start()
 
     # Retain the grad on the input_tensor.
     if input_tensor is not None:
@@ -134,8 +135,8 @@ def backward_step(optimizer, input_tensor, output_tensor, output_tensor_grad, mo
     if input_tensor is not None:
         input_tensor_grad = input_tensor.grad
 
-    if args.use_timer:
-        timers('backward-compute').stop()
+    # default timers
+    timers('backward-compute').stop()
 
     return input_tensor_grad
 

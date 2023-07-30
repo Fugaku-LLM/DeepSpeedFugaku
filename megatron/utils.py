@@ -247,10 +247,10 @@ def throughput_calculator(model, args, iteration_time, total_iterations):
     samples_per_model = batch_size * args.seq_length
     model_replica_count = torch.distributed.get_world_size() / gpus_per_model
     approx_parameters_in_billions = None if (model is None) else get_parameters_in_billions(model)
-    elapsed_time_per_iter = iteration_time/total_iterations
+    elapsed_time_per_iter = iteration_time / total_iterations
     samples_per_second = batch_size / elapsed_time_per_iter
 
-    #flops calculator
+    # flops calculator
     hidden_size = args.hidden_size
     num_layers = args.num_layers
     vocab_size = args.padded_vocab_size
