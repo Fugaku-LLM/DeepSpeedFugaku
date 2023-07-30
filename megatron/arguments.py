@@ -21,14 +21,15 @@ import os
 import torch
 import deepspeed
 
-def get_rank():
+
+def get_rank() -> int:
     rank = None
     rank_environment_variables = [
-        'RANK', # defalut
-        'OMPI_COMM_WORLD_RANK', # OpenMPI
-        'PMIX_RANK', # Fugaku
-        'PMI_RANK' # IntelMPI, mpich2
-        'MV2_COMM_WORLD_RANK' # mvapich2
+        'RANK',  # defalut
+        'OMPI_COMM_WORLD_RANK',  # OpenMPI
+        'PMIX_RANK',  # Fugaku
+        'PMI_RANK',  # IntelMPI, mpich2
+        'MV2_COMM_WORLD_RANK'  # mvapich2
     ]
     for environment_variable in rank_environment_variables:
         rank = os.environ.get(environment_variable)
@@ -37,8 +38,9 @@ def get_rank():
     print('WARNING: rank is not set in the environment variable.')
     return 0
 
+
 def parse_args(extra_args_provider=None, defaults={},
-               ignore_unknown_args=False):
+               ignore_unknown_args=False) -> argparse.Namespace:
     """Parse all arguments."""
     parser = argparse.ArgumentParser(description='Megatron-LM Arguments',
                                      allow_abbrev=False)
@@ -62,6 +64,7 @@ def parse_args(extra_args_provider=None, defaults={},
     parser = _add_memoryopt_args(parser)
     parser = _add_activation_checkpoint_args(parser)
     parser = _add_distillation_args(parser)
+    parser = _add_gpt_fugaku_args(parser=parser)
 
     # Custom arguments.
     if extra_args_provider is not None:
@@ -73,7 +76,7 @@ def parse_args(extra_args_provider=None, defaults={},
     if ignore_unknown_args:
         args, _ = parser.parse_known_args()
     else:
-        args = parser.parse_args()
+        args: argparse.Namespace = parser.parse_args()
 
     # helper argument to set deepspeed pipeline parallel or not
     args.ds_pipeline_enabled = not args.no_pipeline_parallel
@@ -267,7 +270,7 @@ def parse_args(extra_args_provider=None, defaults={},
     args.curriculum_learning_legacy = False
     args.compression_training = False
 
-    # AML
+    # AML (Azure Machine Learning)
     if args.aml_data_download_path is not None:
         data_paths = []
         for path in args.data_path:
@@ -957,4 +960,14 @@ def _add_distillation_args(parser):
     group.add_argument('--load-teacher', type=str, default=None,
                        help='Directory containing a teacher model checkpoint.')
 
+    return parser
+
+
+def _add_gpt_fugaku_args(parser):
+    group = parser.add_argument_group("GPT-Fugaku Project arguments")
+    # for profiling timer
+    group.add_argument("--use-timer", action="store_true",
+                       help="If set, profiling start and write profiling result to `timer/job-name/`")
+    group.add_argument("--use-flush-denormal", action="store_true",
+                       help="If set, torch.set_flush_denornmal(mode=True)")
     return parser
