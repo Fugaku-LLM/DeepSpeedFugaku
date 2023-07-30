@@ -10,5 +10,12 @@
     "DeepSpeed/*": true,
     "wandb/*": true
   },
-  "cSpell.words": ["dataloaders", "stdproc", "TFLOPs"]
+  "cSpell.words": [
+    "dataloaders",
+    "stdproc",
+    "TFLOPs",
+    "Fugaku",
+    "microbatches",
+    "Rampup"
+  ]
 }
