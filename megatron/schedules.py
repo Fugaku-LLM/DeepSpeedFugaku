@@ -50,38 +50,52 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
 
     args = get_args()
 
-    timers('forward-compute').start()
-    timers('unwrap_model').start()
+    if args.use_timer:
+        timers('forward-compute').start()
+        timers('unwrap_model').start()
     unwrapped_model = unwrap_model(
         model, (torchDDP, LocalDDP, Float16Module))
-    timers('unwrap_model').stop()
-    timers('set_input_tensor').start()
+    if args.use_timer:
+        timers('unwrap_model').stop()
+        timers('set_input_tensor').start()
+
     if not args.deepspeed:
         unwrapped_model.set_input_tensor(input_tensor)
     else:
         unwrapped_model.module.set_input_tensor(input_tensor)
-    timers('set_input_tensor').stop()
+
+    if args.use_timer:
+        timers('set_input_tensor').stop()
 
     # Note: it's recommended to NOT add any new argument to forward_step_func()
     # because it is an abstract API used by many different models and tasks.
     # Changing this API requires changing it in all models/tasks. Instead,
     # it's recommended to use args to pass additional arguments.
-    timers('forward_step_func').start()
+    if args.use_timer:
+        timers('forward_step_func').start()
     output_tensor, loss_func = forward_step_func(data_iterator, model)
-    timers('forward_step_func').stop()
-    timers('pipeline_last_stage').start()
+    if args.use_timer:
+        timers('forward_step_func').stop()
+
+    if args.use_timer:
+        timers('pipeline_last_stage').start()
     if mpu.is_pipeline_last_stage():
-        timers('loss_func').start()
+        if args.use_timer:
+            timers('loss_func').start()
         output_tensor = loss_func(output_tensor)
-        timers('loss_func').stop()
+        if args.use_timer:
+            timers('loss_func').stop()
         loss, loss_reduced = output_tensor
         if not args.no_pipeline_parallel:
             output_tensor = loss / get_num_microbatches()
         else:
             output_tensor = loss
         losses_reduced.append(loss_reduced)
-    timers('pipeline_last_stage').stop()
-    timers('forward-compute').stop()
+    if args.use_timer:
+        timers('pipeline_last_stage').stop()
+
+    if args.use_timer:
+        timers('forward-compute').stop()
 
     return output_tensor
 
@@ -100,7 +114,8 @@ def backward_step(optimizer, input_tensor, output_tensor, output_tensor_grad, mo
         assert model is not None
 
     timers = get_timers()
-    timers('backward-compute').start()
+    if args.use_timer:
+        timers('backward-compute').start()
 
     # Retain the grad on the input_tensor.
     if input_tensor is not None:
@@ -119,7 +134,8 @@ def backward_step(optimizer, input_tensor, output_tensor, output_tensor_grad, mo
     if input_tensor is not None:
         input_tensor_grad = input_tensor.grad
 
-    timers('backward-compute').stop()
+    if args.use_timer:
+        timers('backward-compute').stop()
 
     return input_tensor_grad
 
@@ -155,15 +171,21 @@ def forward_backward_no_pipelining(forward_step_func, data_iterator, model,
     input_tensor, output_tensor_grad = None, None
     with context_handler():
         for i in range(get_num_microbatches() - 1):
-            timers('forward_step').start()
+
+            if args.use_timer:
+                timers('forward_step').start()
             output_tensor = forward_step(forward_step_func, data_iterator, model,
                                          input_tensor, losses_reduced)
-            timers('forward_step').stop()
+            if args.use_timer:
+                timers('forward_step').stop()
+
             if not forward_only:
-                timers('backward_step').start()
+                if args.use_timer:
+                    timers('backward_step').start()
                 backward_step(optimizer, input_tensor, output_tensor,
                               output_tensor_grad, model)
-                timers('backward_step').stop()
+                if args.use_timer:
+                    timers('backward_step').stop()
 
     if args.deepspeed:
         model.set_gradient_accumulation_boundary(True)
@@ -408,7 +430,7 @@ def forward_backward_pipelining_without_interleaving(forward_step_func, data_ite
     stages.
 
     Returns dictionary with losses if the last stage, empty dict otherwise."""
-    
+
     timers = get_timers()
 
     assert len(model) == 1

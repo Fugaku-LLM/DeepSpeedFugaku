@@ -14,6 +14,7 @@
 # https://github.com/bigscience-workshop/Megatron-DeepSpeed/blob/main/megatron/data/indexed_dataset.py
 
 from functools import lru_cache
+import argparse
 import os
 import shutil
 import struct
@@ -21,7 +22,7 @@ from itertools import accumulate
 
 import numpy as np
 import torch
-from megatron import get_timers
+from megatron import get_timers, get_args
 from megatron import print_rank_0
 
 
@@ -541,15 +542,19 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
 
         get(idx) is the same as [idx] but get() does not support slicing.
         """
+        args: argparse.Namespace = get_args()
         timers = get_timers()
         ptr, size = self._index[idx]
         if length is None:
             length = size - offset
         ptr += offset * np.dtype(self._index.dtype).itemsize
-        timers('frombuffer').start()
+
+        if args.use_timer:
+            timers('frombuffer').start()
         np_array = np.frombuffer(self._bin_buffer, dtype=self._index.dtype,
                                  count=length, offset=ptr)
-        timers('frombuffer').stop()
+        if args.use_timer:
+            timers('frombuffer').stop()
         return np_array
 
     @property

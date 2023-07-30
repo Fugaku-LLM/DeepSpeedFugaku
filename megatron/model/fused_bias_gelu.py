@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import torch
 
-from megatron import get_timers
+from megatron import get_timers, get_args
 
 torch._C._jit_set_profiling_mode(False)
 torch._C._jit_set_profiling_executor(False)
@@ -50,13 +51,20 @@ class GeLUFunction(torch.autograd.Function):
     @staticmethod
     # bias is an optional argument
     def forward(ctx, input, bias):
+        args: argparse.Namespace = get_args()
         timers = get_timers()
-        timers('save_for_backward').start()
+
+        if args.use_timer:
+            timers('save_for_backward').start()
         ctx.save_for_backward(input, bias)
-        timers('save_for_backward').stop()
-        timers('bias_gelu').start()
+        if args.use_timer:
+            timers('save_for_backward').stop()
+
+        if args.use_timer:
+            timers('bias_gelu').start()
         result = bias_gelu(bias, input)
-        timers('bias_gelu').stop()
+        if args.use_timer:
+            timers('bias_gelu').stop()
         return result
 
     @staticmethod

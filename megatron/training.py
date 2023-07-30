@@ -21,6 +21,8 @@ import sys
 import time
 import json
 import wandb
+import os
+import argparse
 
 # The earliest we can measure the start time.
 _TRAIN_START_TIME = time.time()
@@ -120,6 +122,12 @@ def pretrain(
     args = get_args()
     timers = get_timers()
 
+    # GPT-Fugaku Setting
+    if args.use_flush_denormal:
+        torch.set_flush_denormal(True)
+    if args.use_timer:
+        os.makedirs(os.environ.get('TIMER', 'timer'), exist_ok=True)
+
     if args.deepspeed:
         args.deepspeed_configuration = json.load(
             open(args.deepspeed_config, "r", encoding="utf-8")
@@ -141,18 +149,24 @@ def pretrain(
             args.compression_training = True
 
     # Model, optimizer, and learning rate.
-    timers("model-and-optimizer-setup").start()
+    if args.use_timer:
+        timers("model-and-optimizer-setup").start()
+    # timer start
     model, optimizer, lr_scheduler = setup_model_and_optimizer(
         model_provider,
         teacher=False,
         data_post_process=data_post_process,
         build_train_valid_test_datasets_provider=train_valid_test_dataset_provider,
     )
-    timers("model-and-optimizer-setup").stop()
+    # timer end
+    if args.use_timer:
+        timers("model-and-optimizer-setup").stop()
     print_datetime("after model, optimizer, and learning rate " "scheduler are built")
 
     # Data stuff.
-    timers("train/valid/test-data-iterators-setup").start()
+    if args.use_timer:
+        timers("train/valid/test-data-iterators-setup").start()
+    # timer start
     if args.virtual_pipeline_model_parallel_size is not None:
         all_data_iterators = [
             build_train_valid_test_data_iterators(train_valid_test_dataset_provider)
@@ -179,7 +193,9 @@ def pretrain(
             args.deepspeed_dataloader = None
         else:
             train_data_iterator = None
-    timers("train/valid/test-data-iterators-setup").stop()
+    # timer end
+    if args.use_timer:
+        timers("train/valid/test-data-iterators-setup").stop()
     print_datetime("after dataloaders are built")
 
     # args.teacher_model is used as global variable to pass the teacher model
@@ -192,7 +208,8 @@ def pretrain(
 
     # Print setup timing.
     print_rank_0("done with setup ...")
-    timers.log(["model-and-optimizer-setup", "train/valid/test-data-iterators-setup"])
+    if args.use_timer:
+        timers.log(["model-and-optimizer-setup", "train/valid/test-data-iterators-setup"])
     print_rank_0("training ...")
 
     iteration = 0
@@ -653,28 +670,44 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
         # calculation in forward pass. Users do not need to set it in the
         # command line to use kd.
         args.teacher_forward = True
-    timers('forward_backward').start()
+
+    if args.use_timer:
+        timers('forward_backward').start()
+    # timer start
     losses_reduced = forward_backward_func(
         forward_step_func, data_iterator, model, optimizer, timers, forward_only=False
     )
-    timers('forward_backward').stop()
+    # timer end
+    if args.use_timer:
+        timers('forward_backward').stop()
+
     if args.mos or args.kd:
         args.teacher_forward = False
 
     # All-reduce if needed.
-    timers('allreduce_params').start()
+    if args.use_timer:
+        timers('allreduce_params').start()
+    # timer start
     if not args.deepspeed and args.DDP_impl == "local":
-        timers("backward-params-all-reduce").start()
+        if args.use_timer:
+            timers("backward-params-all-reduce").start()
+
         for model_module in model:
             model_module.allreduce_gradients()
-        timers("backward-params-all-reduce").stop()
-    timers('allreduce_params').stop()
+
+        if args.use_timer:
+            timers("backward-params-all-reduce").stop()
+    # timer end
+    if args.use_timer:
+        timers('allreduce_params').stop()
 
     # All-reduce word_embeddings' grad across first and last stages to ensure
     # that word_embeddings parameters stay in sync.
     # This should only run for models that support pipelined model parallelism
     # (BERT and GPT-2).
-    timers("backward-embedding-all-reduce").start()
+    if args.use_timer:
+        timers("backward-embedding-all-reduce").start()
+    # timer start
     if not args.deepspeed:
         if (
             mpu.is_pipeline_first_stage(ignore_virtual=True)
@@ -693,17 +726,23 @@ def train_step(forward_step_func, data_iterator, model, optimizer, lr_scheduler)
                 else:
                     grad = word_embeddings_weight.grad
                 torch.distributed.all_reduce(grad, group=mpu.get_embedding_group())
-    timers("backward-embedding-all-reduce").stop()
+    # timer end
+    if args.use_timer:
+        timers("backward-embedding-all-reduce").stop()
 
     # Update parameters.
-    timers("optimizer").start()
+    if args.use_timer:
+        timers("optimizer").start()
+    # timer start
     if args.deepspeed:
         increment = get_num_microbatches() * args.micro_batch_size * args.data_parallel_size
         model[0].step(lr_kwargs={"increment": increment})
         update_successful = model[0].was_step_applied()
     else:
         update_successful, grad_norm, num_zeros_in_grad = optimizer.step()
-    timers("optimizer").stop()
+    # timer end
+    if args.use_timer:
+        timers("optimizer").stop()
 
     # Update learning rate.
     if args.deepspeed:
@@ -1198,77 +1237,30 @@ def training_log(
             report_memory_flag = False
         timers.log(timers_to_log, normalizer=args.log_interval)
 
-        # Output timer data to file
-        timers_to_out = []
-        def add_to_out(name):
-            if name in timers.timers:
-                timers_to_out.append(name)
-        add_to_out('iteration')
-        add_to_out('train_step')
-        add_to_out('forward_backward')
-        add_to_out('forward_step')
-        add_to_out('get_tokenizer')
-        add_to_out('next')
-        add_to_out('gptdataset_shuffle_idx')
-        add_to_out('gptdataset_pre')
-        add_to_out('gptdataset_get')
-        add_to_out('frombuffer')
-        add_to_out('gptdataset_otherwise')
-        add_to_out('gptdataset_dict1')
-        add_to_out('gptdataset_dict2')
-        add_to_out('broadcast_data')
-        add_to_out('_build_key_size_numel_dictionaries')
-        add_to_out('pack')
-        add_to_out('broadcast')
-        add_to_out('unpack')
-        add_to_out('long')
-        add_to_out('contiguous_labels')
-        add_to_out('contiguous_tokens')
-        add_to_out('get_ltor_masks_and_position_ids')
-        add_to_out('forward-compute')
-        add_to_out('unwrap_model')
-        add_to_out('set_input_tensor')
-        add_to_out('forward_step_func')
-        add_to_out('pipeline_last_stage')
-        add_to_out('loss_func')
-        add_to_out('average_losses_across_data_parallel_group')
-        add_to_out('encoder')
-        add_to_out('attention')
-        add_to_out('qkv')
-        add_to_out('adjust_key_value')
-        add_to_out('raw_attention_scores')
-        add_to_out('baddbmm')
-        add_to_out('update_attention_mask')
-        add_to_out('scale_mask_softmax')
-        add_to_out('attention_dropout')
-        add_to_out('context_layer')
-        add_to_out('bmm')
-        add_to_out('dense')
-        add_to_out('row_par_lin_mm')
-        add_to_out('row_par_lin_allreduce')
-        add_to_out('mlp')
-        add_to_out('dense_h_to_4h')
-        add_to_out('activation_func')
-        add_to_out('save_for_backward')
-        add_to_out('bias_gelu')
-        add_to_out('dense_4h_to_h')
-        add_to_out('backward_step')
-        add_to_out('backward-compute')
-        add_to_out('allreduce_params')
-        timers.out(timers_to_out, normalizer=args.log_interval)
+        # Output timer profiling data to the specific file.
+        if args.use_timer:
+            from megatron.timer.timer import collect_active_timers
+
+            valid_target_names: list[str] = collect_active_timers(timers=timers)
+            timers.out(names=valid_target_names, normalizer=args.log_interval)
 
     return report_memory_flag
 
 
 def save_checkpoint_and_time(iteration, model, optimizer, lr_scheduler):
+    args: argparse.Namespace = get_args()
     timers = get_timers()
     # Extra barrier is added to make sure
     # all ranks report the max time.
     torch.distributed.barrier()
-    timers("save-checkpoint").start()
+
+    if args.use_timer:
+        timers("save-checkpoint").start()
     save_checkpoint(iteration, model, optimizer, lr_scheduler)
     torch.distributed.barrier()
-    timers("save-checkpoint").stop()
+    if args.use_timer:
+        timers("save-checkpoint").stop()
+
     checkpoint_throughput_calculator(model, timers("save-checkpoint").elapsed(reset=False))
     timers.log(["save-checkpoint"])
 
@@ -1299,14 +1291,16 @@ def train(
     # Iterations.
     iteration = args.iteration
 
-    timers("interval-time").start()
+    if args.use_timer:
+        timers("interval-time").start()
     print_datetime("before the start of training step")
     report_memory_flag = True
     if args.random_ltd:
         assert model[0].random_ltd_enabled()
         args.random_ltd_layer_num = model[0].random_ltd_scheduler.get_random_ltd_layer_num()
 
-    timers('iteration').start()
+    if args.use_timer:
+        timers('iteration').start()
     while iteration < args.train_iters and (
         args.train_tokens is None or args.consumed_train_tokens < args.train_tokens
     ):
@@ -1322,11 +1316,13 @@ def train(
             args.curriculum_seqlen = args.curriculum_scheduler.update_difficulty(
                 args.iteration + 1
             )
-        timers('train_step').start()
+        if args.use_timer:
+            timers('train_step').start()
         loss_dict, skipped_iter, grad_norm, num_zeros_in_grad = train_step(
             forward_step_func, train_data_iterator, model, optimizer, lr_scheduler
         )
-        timers('train_step').stop()
+        if args.use_timer:
+            timers('train_step').stop()
         iteration += 1
         args.iteration = iteration
         new_samples = (
@@ -1418,7 +1414,8 @@ def train(
             torch.distributed.barrier()
             print_datetime("exiting program at iteration {}".format(iteration))
             sys.exit()
-    timers('iteration').stop()
+    if args.use_timer:
+        timers('iteration').stop()
 
     return iteration
 

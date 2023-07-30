@@ -21,18 +21,24 @@ import time
 import numpy as np
 import torch
 from deepspeed.accelerator import get_accelerator
-from megatron import get_timers
-from megatron import mpu, is_rank_0, print_rank_0, get_args
+from megatron import mpu, is_rank_0, print_rank_0, get_args, get_timers
 from megatron.data.blendable_dataset import BlendableDataset
 from megatron.data.dataset_utils import get_datasets_weights_and_num_samples
 from megatron.data.dataset_utils import get_train_valid_test_split_
 from megatron.data.indexed_dataset import make_dataset as make_indexed_dataset
 
 
-def build_train_valid_test_datasets(data_prefix, data_impl, splits_string,
+def build_train_valid_test_datasets(data_prefix: list[str], data_impl: str, splits_string: str,
                                     train_valid_test_num_samples,
                                     seq_length, seed, skip_warmup):
-    """Build train, valid, and test datasets."""
+    """Build train, valid, and test datasets.
+
+    Args:
+        data_prefix (list[str] | str): paths to dataset
+            (ex: ['dataset/ja_wiki_text', 'dataset/en_wiki_text'])
+        data_imp: str (ex: mmap)
+        splits_string: str (ex: '969, 30, 1')
+    """
 
     # Single dataset.
     if len(data_prefix) == 1:
@@ -164,25 +170,33 @@ class GPTDataset(torch.utils.data.Dataset):
         args = get_args()
         orig_idx = idx
         # Get the shuffled index.
-        timers('gptdataset_shuffle_idx').start()
+        if args.use_timer:
+            timers('gptdataset_shuffle_idx').start()
         idx = self.shuffle_idx[idx]
-        timers('gptdataset_shuffle_idx').stop()
+        if args.use_timer:
+            timers('gptdataset_shuffle_idx').stop()
+
         # Start and end documents and offsets.
-        timers('gptdataset_pre').start()
+        if args.use_timer:
+            timers('gptdataset_pre').start()
         doc_index_f = self.sample_idx[idx][0]
         doc_index_l = self.sample_idx[idx + 1][0]
         offset_f = self.sample_idx[idx][1]
         offset_l = self.sample_idx[idx + 1][1]
-        timers('gptdataset_pre').stop()
+        if args.use_timer:
+            timers('gptdataset_pre').stop()
         # If we are within the same document, just extract the chunk.
         if doc_index_f == doc_index_l:
-            timers('gptdataset_get').start()
+            if args.use_timer:
+                timers('gptdataset_get').start()
             sample = self.indexed_dataset.get(self.doc_idx[doc_index_f],
                                               offset=offset_f,
                                               length=offset_l - offset_f + 1)
-            timers('gptdataset_get').stop()
+            if args.use_timer:
+                timers('gptdataset_get').stop()
         else:
-            timers('gptdataset_otherwise').start()
+            if args.use_timer:
+                timers('gptdataset_otherwise').start()
             # Otherwise, get the rest of the initial document.
             sample_list = [self.indexed_dataset.get(self.doc_idx[doc_index_f],
                                                     offset=offset_f)]
@@ -194,15 +208,21 @@ class GPTDataset(torch.utils.data.Dataset):
                 self.doc_idx[doc_index_l],
                 length=offset_l + 1))
             sample = np.concatenate(sample_list)
-            timers('gptdataset_otherwise').stop()
+            if args.use_timer:
+                timers('gptdataset_otherwise').stop()
         if args.return_data_index:
-            timers('gptdataset_dict1').start()
+            if args.use_timer:
+                timers('gptdataset_dict1').start()
             ret = {'text': np.array(sample, dtype=np.int64), 'index': np.array([orig_idx], dtype=np.int64)}
-            timers('gptdataset_dict1').stop()
+            if args.use_timer:
+                timers('gptdataset_dict1').stop()
             return ret
-        timers('gptdataset_dict2').start()
+
+        if args.use_timer:
+            timers('gptdataset_dict2').start()
         ret = {'text': np.array(sample, dtype=np.int64)}
-        timers('gptdataset_dict2').stop()
+        if args.use_timer:
+            timers('gptdataset_dict2').stop()
         return ret
 
 
