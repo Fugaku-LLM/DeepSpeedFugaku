@@ -25,7 +25,7 @@ import deepspeed
 def get_rank() -> int:
     rank = None
     rank_environment_variables = [
-        'RANK',  # defalut
+        'RANK',  # default
         'OMPI_COMM_WORLD_RANK',  # OpenMPI
         'PMIX_RANK',  # Fugaku
         'PMI_RANK',  # IntelMPI, mpich2
@@ -116,13 +116,13 @@ def parse_args(extra_args_provider=None, defaults={},
     # Deprecated arguments
     assert args.batch_size is None, '--batch-size argument is no longer ' \
         'valid, use --micro-batch-size instead'
-    del args.batch_size
+    del args.batch_size  # type: ignore
     assert args.warmup is None, '--warmup argument is no longer valid, use ' \
         '--lr-warmup-fraction instead'
-    del args.warmup
+    del args.warmup  # type: ignore
     assert args.model_parallel_size is None, '--model-parallel-size is no ' \
         'longer valid, use --tensor-model-parallel-size instead'
-    del args.model_parallel_size
+    del args.model_parallel_size  # type: ignore
 
     # Set input defaults.
     for key in defaults:
@@ -281,7 +281,7 @@ def parse_args(extra_args_provider=None, defaults={},
     return args
 
 
-def _print_args(args):
+def _print_args(args: argparse.Namespace) -> None:
     """Print arguments."""
     if args.rank == 0:
         print('------------------------ arguments ------------------------',
@@ -300,7 +300,7 @@ def _check_arg_is_not_none(args, arg):
     assert getattr(args, arg) is not None, '{} argument is None'.format(arg)
 
 
-def _add_network_size_args(parser):
+def _add_network_size_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='network size')
 
     group.add_argument('--num-layers', type=int, default=None,
@@ -351,7 +351,7 @@ def _add_network_size_args(parser):
     return parser
 
 
-def _add_logging_args(parser):
+def _add_logging_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='logging')
 
     group.add_argument('--log-params-norm', action='store_true',
@@ -388,7 +388,7 @@ def _add_logging_args(parser):
     return parser
 
 
-def _add_regularization_args(parser):
+def _add_regularization_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='regularization')
 
     group.add_argument('--attention-dropout', type=float, default=0.1,
@@ -414,7 +414,7 @@ def _add_regularization_args(parser):
     return parser
 
 
-def _add_training_args(parser):
+def _add_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='training')
 
     group.add_argument('--micro-batch-size', type=int, default=None,
@@ -524,7 +524,7 @@ def _add_training_args(parser):
     return parser
 
 
-def _add_initialization_args(parser):
+def _add_initialization_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='initialization')
 
     group.add_argument('--seed', type=int, default=1234,
@@ -539,7 +539,7 @@ def _add_initialization_args(parser):
     return parser
 
 
-def _add_learning_rate_args(parser):
+def _add_learning_rate_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='learning rate')
 
     group.add_argument('--lr', type=float, default=None,
@@ -591,7 +591,7 @@ def _add_learning_rate_args(parser):
     return parser
 
 
-def _add_checkpointing_args(parser):
+def _add_checkpointing_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='checkpointing')
 
     group.add_argument('--save', type=str, default=None,
@@ -609,7 +609,7 @@ def _add_checkpointing_args(parser):
     group.add_argument('--no-load-rng', action='store_true', default=None,
                        help='Do not load rng state when loading checkpoint.')
     group.add_argument('--no-load-lr-state', action='store_true',
-                       help='Do not load lr state when loading checkpoint.')   
+                       help='Do not load lr state when loading checkpoint.')
     group.add_argument('--finetune', action='store_true',
                        help='Load model for finetuning. Do not load optimizer '
                        'or rng state from checkpoint and set iteration to 0. '
@@ -618,7 +618,7 @@ def _add_checkpointing_args(parser):
     return parser
 
 
-def _add_mixed_precision_args(parser):
+def _add_mixed_precision_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='mixed precision')
 
     group.add_argument('--fp16', action='store_true',
@@ -656,7 +656,7 @@ def _add_mixed_precision_args(parser):
     return parser
 
 
-def _add_distributed_args(parser):
+def _add_distributed_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='distributed')
 
     group.add_argument('--tensor-model-parallel-size', type=int, default=1,
@@ -703,7 +703,7 @@ def _add_distributed_args(parser):
     return parser
 
 
-def _add_validation_args(parser):
+def _add_validation_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='validation')
 
     group.add_argument('--eval-iters', type=int, default=100,
@@ -716,7 +716,7 @@ def _add_validation_args(parser):
     return parser
 
 
-def _add_data_args(parser):
+def _add_data_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='data and dataloader')
 
     group.add_argument('--aml-data-download-path', type=str, default=None,
@@ -794,7 +794,7 @@ def _add_data_args(parser):
     return parser
 
 
-def _add_autoresume_args(parser):
+def _add_autoresume_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='autoresume')
 
     group.add_argument('--adlr-autoresume', action='store_true',
@@ -806,7 +806,7 @@ def _add_autoresume_args(parser):
     return parser
 
 
-def _add_biencoder_args(parser):
+def _add_biencoder_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title='biencoder')
 
     # network size
@@ -863,7 +863,7 @@ def _add_biencoder_args(parser):
     return parser
 
 
-def _add_vit_args(parser):
+def _add_vit_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group(title="vit")
 
     group.add_argument('--num-classes', type=int, default=1000,
@@ -878,7 +878,7 @@ def _add_vit_args(parser):
     return parser
 
 
-def _add_zero_args(parser):
+def _add_zero_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Text generate arguments."""
 
     group = parser.add_argument_group('ZeRO configurations', 'configurations')
@@ -895,7 +895,7 @@ def _add_zero_args(parser):
                      help='Use pinned CPU memory for ZeRO-3 initialized model parameters.')
     return parser
 
-def _add_memoryopt_args(parser):
+def _add_memoryopt_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Memory optimization arguments."""
 
     group = parser.add_argument_group('Memory optimizations', 'configurations')
@@ -916,7 +916,7 @@ def _add_memoryopt_args(parser):
 
     return parser
 
-def _add_activation_checkpoint_args(parser):
+def _add_activation_checkpoint_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group('Activation Checkpointing',
                                       'Checkpointing Configurations')
     group.add_argument('--deepspeed-activation-checkpointing', action='store_true',
@@ -934,7 +934,7 @@ def _add_activation_checkpoint_args(parser):
     return parser
 
 
-def _add_distillation_args(parser):
+def _add_distillation_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group('Knowledge distillation',
                                       'Distillation Configurations')
     
@@ -963,7 +963,7 @@ def _add_distillation_args(parser):
     return parser
 
 
-def _add_gpt_fugaku_args(parser):
+def _add_gpt_fugaku_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     group = parser.add_argument_group("GPT-Fugaku Project arguments")
     # for profiling timer
     group.add_argument("--use-timer", action="store_true",
