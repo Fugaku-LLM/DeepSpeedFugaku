@@ -3,4 +3,12 @@
     "--max-line-length=120",
     "--ignore=E402,F841,F401,E302,E305,E203,W503"
   ],
+  "files.watcherExclude": {
+    "**/__pycache__": true,
+    "**/.mypy_cache": true,
+    "pytorch/*": true,
+    "DeepSpeed/*": true,
+    "wandb/*": true
+  },
+  "cSpell.words": ["stdproc"]
 }
