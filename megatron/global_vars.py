@@ -26,12 +26,15 @@ import torch
 from deepspeed.accelerator import get_accelerator
 
 from megatron.tokenizer import build_tokenizer
+from megatron.microbatches import ConstantNumMicroBatches, RampupBatchsizeNumMicroBatches
 
 from .arguments import parse_args
 from .microbatches import build_num_microbatches_calculator
 
 _GLOBAL_ARGS: typing.Optional[argparse.Namespace] = None
-_GLOBAL_NUM_MICROBATCHES_CALCULATOR = None
+_GLOBAL_NUM_MICROBATCHES_CALCULATOR: typing.Optional[
+    typing.Union[ConstantNumMicroBatches, RampupBatchsizeNumMicroBatches]
+] = None
 _GLOBAL_TOKENIZER = None
 _GLOBAL_TENSORBOARD_WRITER = None
 _GLOBAL_WANDB_WRITER = None
@@ -45,12 +48,12 @@ def get_args() -> argparse.Namespace:
     return _GLOBAL_ARGS  # type: ignore
 
 
-def get_num_microbatches():
-    return _GLOBAL_NUM_MICROBATCHES_CALCULATOR.get()
+def get_num_microbatches() -> int:
+    return _GLOBAL_NUM_MICROBATCHES_CALCULATOR.get()  # type: ignore
 
 
-def get_current_global_batch_size():
-    return _GLOBAL_NUM_MICROBATCHES_CALCULATOR.get_current_global_batch_size()
+def get_current_global_batch_size() -> int:
+    return _GLOBAL_NUM_MICROBATCHES_CALCULATOR.get_current_global_batch_size()  # type: ignore
 
 
 def update_num_microbatches(consumed_samples, consistency_check=True):
@@ -105,7 +108,9 @@ def set_global_variables(extra_args_provider=None, args_defaults={}, ignore_unkn
     _set_timers()
 
 
-def _parse_args(extra_args_provider=None, defaults={}, ignore_unknown_args=False) -> argparse.Namespace:
+def _parse_args(
+    extra_args_provider=None, defaults={}, ignore_unknown_args=False
+) -> argparse.Namespace:
     """Parse entire arguments."""
     global _GLOBAL_ARGS
     _ensure_var_is_not_initialized(_GLOBAL_ARGS, "args")
@@ -117,7 +122,7 @@ def _parse_args(extra_args_provider=None, defaults={}, ignore_unknown_args=False
     return _GLOBAL_ARGS
 
 
-def _build_num_microbatches_calculator(args):
+def _build_num_microbatches_calculator(args: argparse.Namespace) -> None:
     global _GLOBAL_NUM_MICROBATCHES_CALCULATOR
     _ensure_var_is_not_initialized(
         _GLOBAL_NUM_MICROBATCHES_CALCULATOR, "num microbatches calculator"
@@ -166,7 +171,7 @@ def _set_tensorboard_writer(args):
             )
 
 
-def _set_wandb_writer(args):
+def _set_wandb_writer(args: argparse.Namespace) -> None:
     """Set wandb writer."""
     global _GLOBAL_WANDB_WRITER
     _ensure_var_is_not_initialized(_GLOBAL_WANDB_WRITER, "wandb writer")
