@@ -30,7 +30,10 @@ CHECKPOINT_PATH=checkpoints/ja-en-wiki/350m_dp4_v1_ja${JA_VOCAB_SIZE}K_en${EN_VO
 INPUT_PREFIX=dataset
 VOCAB_FILE=tokenizer/models/cc100ja1GB_cc100en1GB/cc100_ja${JA_VOCAB_SIZE}K_en${EN_VOCAB_SIZE}K.symbolRemoved.vocab.reestimated.model
 
-DATA_PATH="data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/ja_wiki_text_document data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/en_wiki_text_document"
+DATA_PATH="
+  1 data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/ja_wiki_text_document
+  1 data/wikipedia/binarized/v1-ja${JA_VOCAB_SIZE}K-en${EN_VOCAB_SIZE}K/en_wiki_text_document
+"
 
 TENSORBOARD_ARGS="--tensorboard-dir experiments/tensorboard"
 
