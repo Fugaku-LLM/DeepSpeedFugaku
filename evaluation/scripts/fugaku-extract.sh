@@ -12,7 +12,7 @@ NUM_SAMPLES=35
 
 
 python evaluation/text_extractor.py \
-  --input dataset/wikipedia/merged/ja/ja_merged.json \
+  --input data/wikipedia/merged/ja/ja_merged.json \
   --output evaluation/out/samples.txt \
   --text-max-len $MAX_LENGTH \
   --num-samples $NUM_SAMPLES \
