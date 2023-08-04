@@ -16,7 +16,7 @@ Hinadori CPU Installation
     git clone git@github.com:rioyokotalab/DeepSpeedFugaku.git
     cd DeepSpeedFugaku
 
-    git switch training/feature/benchmark-ja-wiki
+    git switch training/feature/v2-tokenizer
     git clone --recursive https://github.com/pytorch/pytorch
     cd pytorch
 

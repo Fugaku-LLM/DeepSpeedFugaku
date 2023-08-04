@@ -39,7 +39,7 @@ Install DeepSpeedFugaku and Python modules
     git clone git@github.com:rioyokotalab/DeepSpeedFugaku.git
     cd DeepSpeedFugaku/
 
-    git switch training/feature/benchmark-ja-wiki
+    git switch training/feature/v2-tokenizer
     git branch <user-sub-team-name>/feature/<branch-name>
     git switch <user-sub-team-name>/feature/<branch-name>
 
