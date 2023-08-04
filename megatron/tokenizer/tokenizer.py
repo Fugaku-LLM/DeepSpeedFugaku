@@ -301,9 +301,9 @@ class _JapaneseSentencePiece(AbstractTokenizer):
         super().__init__(name)
         self.tokenizer = spm.SentencePieceProcessor(model_file=vocab_file)
         # TODO: make sure eod and pad ids are included in the pre-trained tokenizer
-        self.eod_id = self.tokenizer.piece_to_id("<|endoftext|>")
-        self.pad_id = self.tokenizer.piece_to_id("<|padding|>")
-        self.eol_symbol = "<|endofline|>"
+        self.eod_id = self.tokenizer.piece_to_id("</s>")
+        self.pad_id = self.tokenizer.piece_to_id("<pad>")
+        self.eol_symbol = "\n"
 
     @property
     def vocab_size(self):
