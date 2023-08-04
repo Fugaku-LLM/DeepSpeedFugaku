@@ -1,0 +1,14 @@
+pybind11
+
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.0.1+cu117
+
+six
+regex
+numpy
+
+deepspeed
+
+# for tokenizing
+sentencepiece
+nltk
