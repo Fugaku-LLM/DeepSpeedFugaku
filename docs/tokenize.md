@@ -17,10 +17,10 @@ Megatron-DeepSpeed の環境構築方法の詳細については、[こちらの
 
 ### dataset の用意
 
-Fugaku で dataset を download しても良いですが、処理の用意さなどから、通常の CPU 環境での作業を推奨します.
+Fugaku で dataset を download しても良いですが、処理の容易さなどから、通常の CPU 環境での作業を推奨します.
 (実は、Fugaku の login ノードは Fujitsu 製の chip ではないので、通常の pip install で作業ができますが、login ノードに負荷をかける行為になるので推奨できません)
 
-(Fugaku 上に、以下の処理をした tokenize 前のデータと、一部の Tokenize 済みデータを`/data/hp190122/share/dataset`に置いてあります。適時使用してください。)
+(Fugaku 上に、以下の処理をした tokenize 前のデータと、一部の Tokenize 済みデータを`/data/hp190122/share/dataset`に置いておきました。適時使用してください。)
 
 ```bash
 
