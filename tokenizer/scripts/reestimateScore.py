@@ -38,7 +38,19 @@ def loadData(path, sp):
 
 def prepareMLM(path):
     print('PREPARE MLM')
-    vocab = [line.split('\t')[0] for line in open(path)]
+    #vocab = [line.split('\t')[0] for line in open(path)]
+    vocab = []
+    newLineFlag = False
+    for line in open(path):
+        if line == '\n':
+            newLineFlag = True
+        elif newLineFlag:
+            newLineFlag = False
+            continue
+        else:
+            line = line.split('\t')[0]
+        vocab.append(line)
+
     mlm = lm.MultigramLM()
     mlm.setVocabFromWordList(vocab)
     return mlm, vocab
