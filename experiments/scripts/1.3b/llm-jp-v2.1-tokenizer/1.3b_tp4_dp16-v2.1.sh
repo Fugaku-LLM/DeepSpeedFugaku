@@ -93,7 +93,7 @@ mpirun $DISTRIBUTED_ARGS \
   --clip-grad 1.0 \
   --lr-warmup-fraction .01 \
   --log-interval 1 \
-  --save-interval 1000 \
+  --save-interval 200 \
   --eval-interval 100 \
   --eval-iters 10 \
   --no-cuda \
