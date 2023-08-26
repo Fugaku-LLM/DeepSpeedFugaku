@@ -70,7 +70,7 @@ export OMP_NUM_THREADS=48
 mpirun $DISTRIBUTED_ARGS \
   python pretrain_gpt.py \
   --num-layers 24 \
-  --hidden-size 1024 \
+  --hidden-size 2048 \
   --num-attention-heads 16 \
   --micro-batch-size 1 \
   --global-batch-size 1024 \
