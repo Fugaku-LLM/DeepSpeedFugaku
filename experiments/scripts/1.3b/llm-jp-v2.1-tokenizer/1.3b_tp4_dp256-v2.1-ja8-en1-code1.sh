@@ -101,6 +101,12 @@ PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
 export OMP_NUM_THREADS=48
 
+# train samples
+seq_len=2048
+# we use another termination condition, train_tokens, instead of train_samples.
+# but not using train_samples causes error. so we set train_samples to a large number.
+train_samples=$(( 300 * 1000000000 * 2 / ${seq_len} ))
+
 mpirun $DISTRIBUTED_ARGS \
   python pretrain_gpt.py \
   --num-layers 24 \
@@ -108,9 +114,10 @@ mpirun $DISTRIBUTED_ARGS \
   --num-attention-heads 16 \
   --micro-batch-size 2 \
   --global-batch-size 512 \
-  --seq-length 2048 \
-  --max-position-embeddings 2048 \
+  --seq-length $seq_len \
+  --max-position-embeddings $seq_len \
   --train-tokens $train_token \
+  --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
   --save $CHECKPOINT_PATH \
