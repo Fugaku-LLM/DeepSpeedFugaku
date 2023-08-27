@@ -465,7 +465,7 @@ def _add_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPars
                        'training runs.')
     group.add_argument('--random-ltd',
                        action='store_true',
-                       help='enable random layer token drop')    
+                       help='enable random layer token drop')
     group.add_argument('--log-interval', type=int, default=100,
                        help='Report loss and timing interval.')
     group.add_argument('--exit-interval', type=int, default=None,

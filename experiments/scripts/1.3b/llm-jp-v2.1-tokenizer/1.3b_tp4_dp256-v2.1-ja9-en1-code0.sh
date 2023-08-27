@@ -9,6 +9,8 @@
 #PJM -j
 #PJM -S
 
+set -e
+
 source /data/hp190122/share/PyTorch-1.10.1/env.src
 export PYTHONUSERBASE=$HOME/work/.local
 export PATH=$PATH:$PYTHONUSERBASE/bin
@@ -35,11 +37,13 @@ code_stack_weight=0
 
 # training setting
 train_token_in_billion=159
-train_token=$(($train_token_in_billion * 1000 * 1000 * 1000))
+train_token=$(echo "$train_token_in_billion * 1000 * 1000 * 1000" | bc)
+train_token=$(echo "$train_token/1" | bc)
 
 # default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens. we use 159 billion tokens, so we set 1.59 billion tokens to lr-warmup-tokens.
 lr_warmup_tokens_in_billion=1.59
-lr_warmup_tokens=$(($lr_warmup_tokens_in_billion * 1000 * 1000 * 1000))
+lr_warmup_tokens=$(echo "$lr_warmup_tokens_in_billion * 1000 * 1000 * 1000" | bc)
+lr_warmup_tokens=$(echo "$lr_warmup_tokens/1" | bc)
 
 # same as megatron deepspeed setting
 lr_decay_tokens_in_billion=${train_token_in_billion}
