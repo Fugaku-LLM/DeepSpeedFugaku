@@ -1,5 +1,6 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=ppu2023"
+#PJM --rsc-list "proc-openfd=65536"
 #PJM -L elapse=24:00:00
 #PJM -L "node=1024"
 #PJM --mpi "proc=1024"
