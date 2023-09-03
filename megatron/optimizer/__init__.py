@@ -21,6 +21,7 @@ except ImportError:
     from torch.optim import AdamW
     from torch.optim import SGD
 
+import torch
 
 from megatron import get_args
 from megatron.model import LayerNorm
@@ -60,7 +61,7 @@ def get_megatron_optimizer(model):
     if args.create_moe_param_group:
         from deepspeed.moe.utils import is_moe_param, split_params_into_different_moe_groups_for_optimizer
         param_groups = split_params_into_different_moe_groups_for_optimizer(param_groups)
-    
+
     if args.cpu_optimizer:
         assert args.optimizer == 'adam', 'CPU offloading is for Adam'
         if args.cpu_torch_adam:
@@ -70,14 +71,16 @@ def get_megatron_optimizer(model):
             cpu_adam_optimizer = DeepSpeedCPUAdam
         optimizer = cpu_adam_optimizer(param_groups,
                                        lr=args.lr,
-                                       weight_decay=args.weight_decay)
+                                       weight_decay=args.weight_decay,
+                                       betas=(args.adam_beta1, args.adam_beta2),
+                                       eps=args.adam_eps)
     else:
         if args.optimizer == 'adam':
-            optimizer = AdamW(param_groups,
-                            lr=args.lr,
-                            weight_decay=args.weight_decay,
-                            betas=(args.adam_beta1, args.adam_beta2),
-                            eps=args.adam_eps)
+            optimizer = torch.optim.AdamW(param_groups,
+                                            lr=args.lr,
+                                            weight_decay=args.weight_decay,
+                                            betas=(args.adam_beta1, args.adam_beta2),
+                                            eps=args.adam_eps)
         elif args.optimizer == 'sgd':
             optimizer = SGD(param_groups,
                             lr=args.lr,

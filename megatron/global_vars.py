@@ -192,7 +192,7 @@ def _set_wandb_writer(args: argparse.Namespace) -> None:
                 "entity": "gpt-fugaku",
                 "name": exp_name,
                 "config": args,
-                "project": "llm-jp-v1-dataset",
+                "project": "megatron-cpu-test",
             }
             if args.wandb_id is not None:
                 wandb_input["id"] = args.wandb_id
