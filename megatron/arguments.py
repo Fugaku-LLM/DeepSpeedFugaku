@@ -512,7 +512,7 @@ def _add_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPars
                        help='DeepSpeed inference engine being used')
     group.add_argument('--cpu-optimizer', action='store_true',
                        help='Run optimizer on CPU')
-    group.add_argument('--cpu_torch_adam', action='store_true',
+    group.add_argument('--cpu-torch-adam', action='store_true',
                        help='Use Torch Adam as optimizer on CPU.')
     group.add_argument('--no-pipeline-parallel', action='store_true',
                        help='Disable pipeline parallelism')
