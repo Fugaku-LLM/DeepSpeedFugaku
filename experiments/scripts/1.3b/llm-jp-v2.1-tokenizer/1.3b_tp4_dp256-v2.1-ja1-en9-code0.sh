@@ -57,7 +57,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/llm-jp-v1/1.3b_tp4_dp256_v2.1_code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k/ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}
+CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/llm-jp-v1/1.3b_tp4_dp256_v2.1_code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k/ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}_9_21
 VOCAB_FILE=tokenizer/models/ver2/code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k.ver2.1.model
 
 mkdir -p $CHECKPOINT_PATH
@@ -131,6 +131,8 @@ mpirun $DISTRIBUTED_ARGS \
   --min-lr 1.0e-6 \
   --lr-decay-style cosine \
   --weight-decay 0.1 \
+  --cpu-optimizer \
+  --cpu-torch-adam \
   --adam-beta1 0.9 \
   --adam-beta2 0.95 \
   --clip-grad 1.0 \

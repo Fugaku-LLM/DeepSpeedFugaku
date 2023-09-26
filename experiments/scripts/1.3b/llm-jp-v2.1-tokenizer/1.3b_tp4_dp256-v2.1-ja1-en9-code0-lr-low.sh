@@ -25,24 +25,24 @@ EN_VOCAB_SIZE=40
 JA_VOCAB_SIZE=60
 
 # dataset setting
-JA_PERTCENT=90
-EN_PERTCENT=10
+JA_PERTCENT=10
+EN_PERTCENT=90
 CODE_PERTCENT=0
 
 # dataset weight setting
-ja_wiki_weight=0.01014874486
-en_wiki_weight=0.03344558481
-ja_cc_weight=0.02341713829
-en_pile_weight=0.001478987004
+ja_wiki_weight=0.007834655649
+en_wiki_weight=0.02581941351
+ja_cc_weight=0.002425403799
+en_pile_weight=0.01942623526
 code_stack_weight=0
 
 # training setting
-train_token_in_billion=159
+train_token_in_billion=206
 train_token=$(echo "$train_token_in_billion * 1000 * 1000 * 1000" | bc)
 train_token=$(echo "$train_token/1" | bc)
 
-# default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens. we use 159 billion tokens, so we set 1.59 billion tokens to lr-warmup-tokens.
-lr_warmup_tokens_in_billion=1.59
+# default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens. we use 206 billion tokens, so we set 2.06 billion tokens to lr-warmup-tokens.
+lr_warmup_tokens_in_billion=2.06
 lr_warmup_tokens=$(echo "$lr_warmup_tokens_in_billion * 1000 * 1000 * 1000" | bc)
 lr_warmup_tokens=$(echo "$lr_warmup_tokens/1" | bc)
 
@@ -57,7 +57,7 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/llm-jp-v1/1.3b_tp4_dp256_v2.1_code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k/ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}_9_21
+CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/llm-jp-v1/1.3b_tp4_dp256_v2.1_code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k/ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}_9_21_lr_low
 VOCAB_FILE=tokenizer/models/ver2/code${CODE_VOCAB_SIZE}k_en${EN_VOCAB_SIZE}k_ja${JA_VOCAB_SIZE}k.ver2.1.model
 
 mkdir -p $CHECKPOINT_PATH
@@ -127,7 +127,7 @@ mpirun $DISTRIBUTED_ARGS \
   --split 949,50,1 \
   --distributed-backend mpi \
   --init-method-std 0.013 \
-  --lr 2.0e-4 \
+  --lr 1.0e-4 \
   --min-lr 1.0e-6 \
   --lr-decay-style cosine \
   --weight-decay 0.1 \
@@ -152,4 +152,4 @@ mpirun $DISTRIBUTED_ARGS \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
-  --wandb-name "1.3b_gb512-ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}"
+  --wandb-name "1.3b_gb512-lr-low-ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}"
