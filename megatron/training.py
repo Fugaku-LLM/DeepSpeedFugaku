@@ -1125,18 +1125,18 @@ def training_log(
                 writer.add_scalar("optimizer/weight_abs_max", opt_stats_2[3], iteration)
 
             if wandb_writer and is_last_rank():
-                wandb_stats["optimizer/variance_l2"] = opt_stats[0] ** 0.5
-                wandb_stats["optimizer/variance_sqrt_l2"] = opt_stats[1] ** 0.5
-                wandb_stats["optimizer/momentum_l2"] = opt_stats[2] ** 0.5
-                wandb_stats["optimizer/weight_l2"] = opt_stats[3] ** 0.5
-                wandb_stats["optimizer/variance_l1"] = opt_stats[4]
-                wandb_stats["optimizer/variance_sqrt_l1"] = opt_stats[5]
-                wandb_stats["optimizer/momentum_l1"] = opt_stats[6]
-                wandb_stats["optimizer/weight_l1"] = opt_stats[7]
-                wandb_stats["optimizer/variance_abs_max"] = opt_stats_2[0]
-                wandb_stats["optimizer/variance_sqrt_abs_max"] = opt_stats_2[1]
-                wandb_stats["optimizer/momentum_abs_max"] = opt_stats_2[2]
-                wandb_stats["optimizer/weight_abs_max"] = opt_stats_2[3]
+                wandb_stats["optimizer/variance_l2"] = opt_stats[0] ** 0.5 / args.world_size
+                wandb_stats["optimizer/variance_sqrt_l2"] = opt_stats[1] ** 0.5 / args.world_size
+                wandb_stats["optimizer/momentum_l2"] = opt_stats[2] ** 0.5 / args.world_size
+                wandb_stats["optimizer/weight_l2"] = opt_stats[3] ** 0.5 / args.world_size
+                wandb_stats["optimizer/variance_l1"] = opt_stats[4] / args.world_size
+                wandb_stats["optimizer/variance_sqrt_l1"] = opt_stats[5] / args.world_size
+                wandb_stats["optimizer/momentum_l1"] = opt_stats[6] / args.world_size
+                wandb_stats["optimizer/weight_l1"] = opt_stats[7] / args.world_size
+                wandb_stats["optimizer/variance_abs_max"] = opt_stats_2[0] / args.world_size
+                wandb_stats["optimizer/variance_sqrt_abs_max"] = opt_stats_2[1] / args.world_size
+                wandb_stats["optimizer/momentum_abs_max"] = opt_stats_2[2] / args.world_size
+                wandb_stats["optimizer/weight_abs_max"] = opt_stats_2[3] / args.world_size
 
     if iteration % args.log_interval == 0:
         elapsed_time = timers("interval-time").elapsed()
