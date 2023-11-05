@@ -31,13 +31,13 @@ from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 
 import deepspeed
-#from deepspeed.runtime.utils import see_memory_usage
+# from deepspeed.runtime.utils import see_memory_usage
 from utils import see_memory_usage
-import os
 import subprocess
 
 from torch import nn
 import torch.nn.functional as F
+
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
