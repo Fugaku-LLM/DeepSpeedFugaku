@@ -25,8 +25,9 @@ import typing
 import torch
 from deepspeed.accelerator import get_accelerator
 
+from megatron.microbatches import (ConstantNumMicroBatches,
+                                   RampupBatchsizeNumMicroBatches)
 from megatron.tokenizer import build_tokenizer
-from megatron.microbatches import ConstantNumMicroBatches, RampupBatchsizeNumMicroBatches
 
 from .arguments import parse_args
 from .microbatches import build_num_microbatches_calculator
@@ -189,10 +190,10 @@ def _set_wandb_writer(args: argparse.Namespace) -> None:
             now = datetime.now()
             exp_name = args.wandb_name + "-" + str(now).replace(" ", "-")
             wandb_input = {
-                "entity": "gpt-fugaku",
+                "entity": args.wandb_entity or "gpt-fugaku",
                 "name": exp_name,
                 "config": args,
-                "project": "tp-loss-analysis",
+                "project": args.wandb_project or "tp-loss-analysis",
             }
             if args.wandb_id is not None:
                 wandb_input["id"] = args.wandb_id

@@ -477,6 +477,8 @@ def _add_training_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPars
                        help='Write TensorBoard logs to this directory.')
     group.add_argument('--wandb-name', type=str, default=None)
     group.add_argument('--wandb-id', type=str, default=None)
+    group.add_argument("--wandb-entity", type=str, default=None)
+    group.add_argument("--wandb-project", type=str, default=None)
     group.add_argument('--no-masked-softmax-fusion',
                        action='store_false',
                        help='Disable fusion of query_key_value scaling, '
