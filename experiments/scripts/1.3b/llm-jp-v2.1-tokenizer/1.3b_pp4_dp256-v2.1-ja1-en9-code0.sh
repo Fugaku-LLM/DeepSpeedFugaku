@@ -152,4 +152,6 @@ mpirun $DISTRIBUTED_ARGS \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
+  --wandb-project "1.3B-llm-jp-dataset-v2.2-tokenizer" \
+  --wandb-name "1.3b_dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}
   --wandb-name "1.3b_gb512-ja${JA_PERTCENT}_en${EN_PERTCENT}_code${CODE_PERTCENT}"
