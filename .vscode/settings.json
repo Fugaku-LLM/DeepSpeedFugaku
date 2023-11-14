@@ -12,10 +12,11 @@
   },
   "cSpell.words": [
     "dataloaders",
-    "stdproc",
-    "TFLOPs",
     "Fugaku",
     "microbatches",
-    "Rampup"
+    "OMPI",
+    "Rampup",
+    "stdproc",
+    "TFLOPs"
   ]
 }
