@@ -198,7 +198,8 @@ def _set_wandb_writer(args: argparse.Namespace) -> None:
             if args.wandb_id is not None:
                 wandb_input["id"] = args.wandb_id
                 wandb_input["resume"] = "must"
-            wandb.init(**wandb_input)
+            wandb.init(**wandb_input,
+                       settings=wandb.Settings(init_timeout=300))
             _GLOBAL_WANDB_WRITER = True
             print("> wandb ...")
         except ModuleNotFoundError:

@@ -181,6 +181,9 @@ SEQUENCE_LENGTH=2048
 train_samples=$((300 * 1000000000 * 2 / ${SEQUENCE_LENGTH}))
 
 mpirun $DISTRIBUTED_ARGS \
+  -x PATH \
+  -x WANDB_INIT_TIMEOUT=3600 \
+  -x WANDB__SERVICE_WAIT=3600 \
   python pretrain_gpt.py \
   --num-layers 24 \
   --hidden-size 2048 \
