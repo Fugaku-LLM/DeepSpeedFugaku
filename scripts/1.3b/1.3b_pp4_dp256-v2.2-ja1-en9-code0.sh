@@ -10,6 +10,17 @@
 #PJM -j
 #PJM -S
 
+# excute env
+/home/system/tool/dir_transfer /data/hp190122/share/PyTorch-1.10.1
+
+# execute python code
+llio_transfer /home/u11887/work/DeepSpeedFugaku/pretrain_gpt.py
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/llm-jp-tokenizer
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/megatron
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/experiments
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/DeepSpeed
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/scripts
+
 set -e
 
 # python vertualenv setting

@@ -12,15 +12,15 @@
 #PJM -S
 
 # excute env
-llio_transfer /data/hp190122/share/PyTorch-1.10.1
+/home/system/tool/dir_transfer /data/hp190122/share/PyTorch-1.10.1
 
 # execute python code
 llio_transfer /home/u11887/work/DeepSpeedFugaku/pretrain_gpt.py
-llio_transfer /home/u11887/work/DeepSpeedFugaku/llm-jp-tokenizer
-llio_transfer /home/u11887/work/DeepSpeedFugaku/megatron
-llio_transfer /home/u11887/work/DeepSpeedFugaku/experiments
-llio_transfer /home/u11887/work/DeepSpeedFugaku/DeepSpeed
-llio_transfer /home/u11887/work/DeepSpeedFugaku/scripts
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/llm-jp-tokenizer
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/megatron
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/experiments
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/DeepSpeed
+/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/scripts
 
 # execute dataset
 # llio_transfer /data/hp190122/share/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k
