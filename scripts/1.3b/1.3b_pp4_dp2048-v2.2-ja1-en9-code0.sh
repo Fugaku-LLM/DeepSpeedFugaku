@@ -1,13 +1,13 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=ppu2023"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=24:00:00
+#PJM -L elapse=1:00:00
 #PJM -L "node=8192"
 #PJM --mpi "proc=8192"
 #PJM --mpi "max-proc-per-node=1"
 #PJM -g hp230254
 #PJM -x PJM_LLIO_GFSCACHE=/vol0003:/vol0004
-#PJM --llio sharedtmp-size=20Gi
+#PJM --llio sharedtmp-size=50Gi
 #PJM -j
 #PJM -S
 
@@ -22,8 +22,11 @@ llio_transfer /home/u11887/work/DeepSpeedFugaku/pretrain_gpt.py
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/DeepSpeed
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/scripts
 
-# execute dataset
-# llio_transfer /data/hp190122/share/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k
+# dataset
+# /home/system/tool/dir_transfer /vol0003/hp190122/data/share/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k/
+
+/home/system/tool/dir_transfer /vol0003/hp190122/data/users/u11887/work/.local/lib/
+
 
 set -e
 
@@ -77,7 +80,7 @@ CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/llm-jp-v1/code10K_en20K_j
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
-DATASET_PATH=/data/hp190122/share/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k
+DATASET_PATH=/2ndfs/hp230254/u11887/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -196,6 +199,7 @@ SEQUENCE_LENGTH=2048
 train_samples=$((300 * 1000000000 * 2 / ${SEQUENCE_LENGTH}))
 
 mpirun $DISTRIBUTED_ARGS \
+  -mca common_tofu_use_memory_pool 1 \
   -x PATH \
   -x WANDB_INIT_TIMEOUT=3600 \
   -x WANDB__SERVICE_WAIT=3600 \
@@ -237,7 +241,7 @@ mpirun $DISTRIBUTED_ARGS \
   --no-cuda \
   --checkpoint-activations \
   --use-cpu-initialization \
-  --num-workers 0 \
+  --num-workers 1 \
   --no-load-rng \
   $PARALLEL_ARGS \
   $TENSORBOARD_ARGS \
