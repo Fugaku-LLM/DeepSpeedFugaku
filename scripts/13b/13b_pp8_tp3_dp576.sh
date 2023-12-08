@@ -225,6 +225,7 @@ mpirun $DISTRIBUTED_ARGS \
   --log-validation-ppl-to-tensorboard \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
+  --use-flush-denormal \
   --wandb-entity "gpt-fugaku" \
   --wandb-project "13B-2023-12-12" \
   --wandb-name "13b_dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}_gbs${GLOBAL_BATCH_SIZE}"
