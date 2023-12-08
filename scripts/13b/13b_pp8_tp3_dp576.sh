@@ -219,7 +219,6 @@ mpirun $DISTRIBUTED_ARGS \
   --checkpoint-activations \
   --use-cpu-initialization \
   --num-workers 1 \
-  --no-load-rng \
   $PARALLEL_ARGS \
   $TENSORBOARD_ARGS \
   --log-batch-size-to-tensorboard \
