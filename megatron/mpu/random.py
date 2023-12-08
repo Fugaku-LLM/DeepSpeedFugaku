@@ -28,19 +28,22 @@ from megatron import get_args
 from megatron.memory import allocate_mem_buff
 
 from .initialize import get_data_parallel_rank
+from .initialize import get_pipeline_model_parallel_rank
 from .initialize import get_tensor_model_parallel_group
 from .initialize import get_tensor_model_parallel_rank
 from .initialize import get_tensor_model_parallel_world_size
 
 
+# Default name for the rng tracker for misc. processing.
+_MISC_RNG_TRACKER_NAME = 'misc-rng'
 # Default name for the model parallel rng tracker.
 _MODEL_PARALLEL_RNG_TRACKER_NAME = 'model-parallel-rng'
-
 
 # Whether apply model parallelsim to checkpointed hidden states.
 _CHECKPOINTED_ACTIVATIONS_MEMORY_BUFFER = None
 
-no_cuda = not torch.cuda.is_available()
+# 2718 is just for fun and any POSITIVE value will work.
+seed_offset = 2718
 
 def init_checkpointed_activations_memory_buffer():
     """Initializ the memory buffer for the checkpointed activations."""
@@ -198,15 +201,88 @@ class CudaRNGStatesTracker:
             # And set the state to the original state we started with.
             _set_cuda_rng_state(orig_cuda_rng_state)
 
+class CpusRNGStatesTracker:
+    """Tracker for the cpus RNG states.
+
+    Using the `add` method, a cpu rng state is initialized based on
+    the input `seed` and is assigned to `name`. Later, by forking the
+    rng state, we can perform operations and return to our starting
+    cuda state.
+    """
+
+    def __init__(self):
+        # Map from a string name to the cuda rng state.
+        self.states_ = {}
+        # Seeds are just for book keeping and ensure no seed is set twice.
+        self.seeds_ = set()
+
+    def reset(self):
+        """Set to the initial state (no tracker)."""
+        self.states_ = {}
+        self.seeds_ = set()
+
+    def get_states(self):
+        """Get rng states. Copy the dictionary so we have direct
+        pointers to the states, not just a pointer to the dictionary."""
+        states = {}
+        for name in self.states_:
+            states[name] = self.states_[name]
+        return states
+
+    def set_states(self, states):
+        """Set the rng states. For efficiency purposes, we do not check
+        the size of seed for compatibility."""
+        self.states_ = states
+
+    def add(self, name, seed):
+        """Track the rng state."""
+        # Check seed is not already used.
+        if seed in self.seeds_:
+            raise Exception('seed {} already exists'.format(seed))
+        self.seeds_.add(seed)
+        # Check that state is not already defined.
+        if name in self.states_:
+            raise Exception('cuda rng state {} already exists'.format(name))
+        # Get the current rng state.
+        orig_rng_state = torch.get_rng_state()
+        # Set the new state and store it.
+        torch.manual_seed(seed)
+        self.states_[name] = torch.get_rng_state()
+        # Reset rng state to what it was.
+        torch.set_rng_state(orig_rng_state)
+
+    @contextlib.contextmanager
+    def fork(self, name=_MODEL_PARALLEL_RNG_TRACKER_NAME):
+        """Fork the cpus rng state, perform operations, and exit with
+        the original state."""
+        # Check if we have added the state
+        if name not in self.states_:
+            raise Exception('cpus rng state {} is not added'.format(name))
+        # Store current rng state.
+        orig_cpus_rng_state = torch.get_rng_state()
+        # Set rng state to the desired one
+        torch.set_rng_state(self.states_[name])
+        # Do the stuff we wanted to do.
+        try:
+            yield
+        finally:
+            # Update the current rng state for later use.
+            self.states_[name] = torch.get_rng_state()
+            # And set the state to the original state we started with.
+            torch.set_rng_state(orig_cpus_rng_state)
 
 # RNG tracker object.
 _CUDA_RNG_STATE_TRACKER = CudaRNGStatesTracker()
+_CPUS_RNG_STATE_TRACKER = CpusRNGStatesTracker()
 
 
 def get_cuda_rng_tracker():
     """Get cuda rng tracker."""
     return _CUDA_RNG_STATE_TRACKER
 
+def get_cpus_rng_tracker():
+    """Get cpus rng tracker."""
+    return _CPUS_RNG_STATE_TRACKER
 
 def model_parallel_cuda_manual_seed(seed):
     """Initialize model parallel cuda seed.
@@ -225,8 +301,7 @@ def model_parallel_cuda_manual_seed(seed):
                               groups. This is used for example for dropout in
                               model parallel regions.
     """
-    # 2718 is just for fun and any POSITIVE value will work.
-    offset = seed + 2718
+    offset = seed + seed_offset
     tensor_model_parallel_seed = offset + get_tensor_model_parallel_rank()
     # Data parallel gets the original seed.
     data_parallel_seed = seed
@@ -245,6 +320,43 @@ def model_parallel_cuda_manual_seed(seed):
     _CUDA_RNG_STATE_TRACKER.add(_MODEL_PARALLEL_RNG_TRACKER_NAME,
                                 tensor_model_parallel_seed)
 
+def model_parallel_cpus_manual_seed(seed):
+    """Initialize model parallel CPUs seed.
+
+    This function should be called after the model parallel is
+    initialized. Also, no torch.cuda.manual_seed should be called
+    after this function. Basically, this is replacement for that
+    function.
+    Two set of RNG states are tracked:
+        default state: This is for data parallelism and is the same among a
+                       set of model parallel CPUs but different across
+                       different model paralle groups. This is used for
+                       example for dropout in the non-tensor-model-parallel regions.
+        tensor-model-parallel state: This state is different among a set of model
+                              parallel CPUs, but the same across data parallel
+                              groups. This is used for example for dropout in
+                              model parallel regions.
+    """
+    offset = seed + seed_offset
+    tensor_model_parallel_seed = offset + get_tensor_model_parallel_rank()
+    # Data parallel gets the original seed.
+    data_parallel_seed = seed
+
+    if torch.distributed.get_rank() == 0:
+        print('> initializing model parallel cpus seeds on global rank {}, '
+              'model parallel rank {}, and data parallel rank {} with '
+              'model parallel seed: {} and data parallel seed: {}'.format(
+                  torch.distributed.get_rank(), get_tensor_model_parallel_rank(),
+                  get_data_parallel_rank(), tensor_model_parallel_seed,
+                  data_parallel_seed), flush=True)
+    _CPUS_RNG_STATE_TRACKER.reset()
+    # Set the default state.
+    torch.manual_seed(data_parallel_seed)
+    _CPUS_RNG_STATE_TRACKER.add(_MISC_RNG_TRACKER_NAME,
+                                data_parallel_seed)
+    # and model parallel state.
+    _CPUS_RNG_STATE_TRACKER.add(_MODEL_PARALLEL_RNG_TRACKER_NAME,
+                                tensor_model_parallel_seed)
 
 class CheckpointFunction(torch.autograd.Function):
     """This function is adapted from torch.utils.checkpoint with
@@ -259,9 +371,11 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Copy the rng states.
         ctx.fwd_cpu_rng_state = torch.get_rng_state()
-        if torch.cuda.is_available():
+        if not get_args().no_cuda:
             ctx.fwd_cuda_rng_state = torch.cuda.get_rng_state()
             ctx.fwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
+        else:
+            ctx.fwd_cpus_rng_state_tracker = get_cpus_rng_tracker().get_states()
 
         with torch.no_grad():
             outputs = run_function(*args)
@@ -282,6 +396,8 @@ class CheckpointFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, *args):
+        no_cuda = get_args().no_cuda
+
         if not torch.autograd._is_checkpoint_valid():
             raise RuntimeError("Checkpointing is not compatible with .grad(), "
                                "please use .backward() if possible")
@@ -292,15 +408,19 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Store the current states.
         bwd_cpu_rng_state = torch.get_rng_state()
-        if torch.cuda.is_available():
+        if not no_cuda:
             bwd_cuda_rng_state = torch.cuda.get_rng_state()
             bwd_cuda_rng_state_tracker = get_cuda_rng_tracker().get_states()
+        else:
+            bwd_cpus_rng_state_tracker = get_cpus_rng_tracker().get_states()
 
         # Set the states to what it used to be before the forward pass.
         torch.set_rng_state(ctx.fwd_cpu_rng_state)
-        if torch.cuda.is_available():
+        if not no_cuda:
             _set_cuda_rng_state(ctx.fwd_cuda_rng_state)
             get_cuda_rng_tracker().set_states(ctx.fwd_cuda_rng_state_tracker)
+        else:
+            get_cpus_rng_tracker().set_states(ctx.fwd_cpus_rng_state_tracker)
 
         # Compute the forward pass.
         detached_inputs = detach_variable(inputs)
@@ -309,9 +429,11 @@ class CheckpointFunction(torch.autograd.Function):
 
         # Set the states back to what it was at the start of this function.
         torch.set_rng_state(bwd_cpu_rng_state)
-        if torch.cuda.is_available():
+        if not no_cuda:
             _set_cuda_rng_state(bwd_cuda_rng_state)
             get_cuda_rng_tracker().set_states(bwd_cuda_rng_state_tracker)
+        else:
+            get_cpus_rng_tracker().set_states(bwd_cpus_rng_state_tracker)
 
         if isinstance(outputs, torch.Tensor):
             outputs = (outputs,)
@@ -330,3 +452,39 @@ def checkpoint(function, *args):
     """Checkpoint a model or part of the model.
     This has been directly copied from torch.utils.checkpoint."""
     return CheckpointFunction.apply(function, *args)
+
+def dump_rng_state(i, tp_seed=True):
+    import numpy as np
+
+    rank = 'DP{},PP{},TP{}'.format(get_data_parallel_rank(), \
+                                   get_pipeline_model_parallel_rank(), \
+                                   get_tensor_model_parallel_rank())
+
+    print('rng_state,{},{},np,{}'.format(i, rank, np.random.get_state(False)))
+
+    def statics(i):
+        sum = i.sum()
+        non_zero = i.count_nonzero()
+        var = i.float().var()
+        mean = i.float().mean()
+        return sum, non_zero, var, mean
+
+    state = torch.get_rng_state()
+    sum, non_zero, var, mean = statics(state)
+    print('rng_state,{},{},torch,{},{},{},{}'.format(i, rank, sum, non_zero, var, mean))
+
+    if tp_seed:
+        no_cuda = get_args().no_cuda
+        if not no_cuda:
+            sum, non_zero, var, mean = statics(get_accelerator().get_rng_state())
+            print('rng_state,{},{},cuda.seed,{},{},{},{}'.format(i, rank, sum, non_zero, var, mean))
+            with get_cuda_rng_tracker().fork():
+                sum, non_zero, var, mean = statics(get_accelerator().get_rng_state())
+                print('rng_state,{},{},cuda.tp_seed,{},{},{},{}'.format(i, rank, sum, non_zero, var, mean))
+        else:
+            with get_cpus_rng_tracker().fork():
+                sum, non_zero, var, mean = statics(torch.get_rng_state())
+                print('rng_state,{},{},torch.tp_seed,{},{},{},{}'.format(i, rank, sum, non_zero, var, mean))
+            with get_cpus_rng_tracker().fork(_MISC_RNG_TRACKER_NAME):
+                sum, non_zero, var, mean = statics(torch.get_rng_state())
+                print('rng_state,{},{},torch.misc_seed,{},{},{},{}'.format(i, rank, sum, non_zero, var, mean))

@@ -1296,6 +1296,7 @@ def train(
 
     if args.use_timer:
         timers('iteration').start()
+
     while iteration < args.train_iters and (
         args.train_tokens is None or args.consumed_train_tokens < args.train_tokens
     ):
@@ -1630,25 +1631,26 @@ def build_train_valid_test_data_iterators(build_train_valid_test_datasets_provid
     dl_type = args.dataloader_type
     assert dl_type in ["single", "cyclic"]
 
-    if train_dataloader is not None:
-        train_data_iterator = (
-            iter(train_dataloader) if dl_type == "single" else iter(cyclic_iter(train_dataloader))
-        )
-    else:
-        train_data_iterator = None
+    with mpu.get_cpus_rng_tracker().fork("misc-rng"):
+        if train_dataloader is not None:
+            train_data_iterator = (
+                iter(train_dataloader) if dl_type == "single" else iter(cyclic_iter(train_dataloader))
+            )
+        else:
+            train_data_iterator = None
 
-    if valid_dataloader is not None:
-        valid_data_iterator = (
-            iter(valid_dataloader) if dl_type == "single" else iter(cyclic_iter(valid_dataloader))
-        )
-    else:
-        valid_data_iterator = None
+        if valid_dataloader is not None:
+            valid_data_iterator = (
+                iter(valid_dataloader) if dl_type == "single" else iter(cyclic_iter(valid_dataloader))
+            )
+        else:
+            valid_data_iterator = None
 
-    if test_dataloader is not None:
-        test_data_iterator = (
-            iter(test_dataloader) if dl_type == "single" else iter(cyclic_iter(test_dataloader))
-        )
-    else:
-        test_data_iterator = None
+        if test_dataloader is not None:
+            test_data_iterator = (
+                iter(test_dataloader) if dl_type == "single" else iter(cyclic_iter(test_dataloader))
+            )
+        else:
+            test_data_iterator = None
 
     return train_data_iterator, valid_data_iterator, test_data_iterator

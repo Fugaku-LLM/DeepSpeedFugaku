@@ -150,9 +150,13 @@ def save_checkpoint(iteration, model, optimizer, lr_scheduler):
             state_dict['random_rng_state'] = random.getstate()
             state_dict['np_rng_state'] = np.random.get_state()
             state_dict['torch_rng_state'] = torch.get_rng_state()
-            #state_dict['cuda_rng_state'] = torch.cuda.get_rng_state()
-            state_dict['rng_tracker_states'] \
-                = mpu.get_cuda_rng_tracker().get_states()
+            if not args.no_cuda:
+                state_dict['cuda_rng_state'] = torch.cuda.get_rng_state()
+                state_dict['rng_tracker_states'] \
+                    = mpu.get_cuda_rng_tracker().get_states()
+            else:
+                state_dict['cpus_rng_tracker_states'] \
+                    = mpu.get_cpus_rng_tracker().get_states()
 
         # Save.
         checkpoint_name = get_checkpoint_name(args.save, iteration)
@@ -417,12 +421,20 @@ def load_checkpoint(model, optimizer, lr_scheduler, load_arg='load', strict=True
             random.setstate(state_dict['random_rng_state'])
             np.random.set_state(state_dict['np_rng_state'])
             torch.set_rng_state(state_dict['torch_rng_state'])
-            get_accelerator().set_rng_state(state_dict['cuda_rng_state'])
-            # Check for empty states array
-            if not state_dict['rng_tracker_states']:
-                raise KeyError
-            mpu.get_cuda_rng_tracker().set_states(
-                state_dict['rng_tracker_states'])
+            if not args.no_cuda:
+                get_accelerator().set_rng_state(state_dict['cuda_rng_state'])
+                # Check for empty states array
+                if not state_dict['rng_tracker_states']:
+                    raise KeyError
+                mpu.get_cuda_rng_tracker().set_states(
+                    state_dict['rng_tracker_states'])
+            else:
+                # Check for empty states array
+                if not state_dict['cpus_rng_tracker_states']:
+                    raise KeyError
+                mpu.get_cpus_rng_tracker().set_states(
+                    state_dict['cpus_rng_tracker_states'])
+
         except KeyError:
             print_rank_0('Unable to load rng state from checkpoint {}. '
                          'Specify --no-load-rng or --finetune to prevent '
