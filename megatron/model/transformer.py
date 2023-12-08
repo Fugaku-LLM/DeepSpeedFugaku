@@ -209,8 +209,9 @@ class ParallelAttention(MegatronModule):
             skip_bias_add=True)
 
         if deepspeed.checkpointing.is_configured():
-            global get_cuda_rng_tracker, checkpoint
+            global get_cuda_rng_tracker, get_cpu_rng_tracker, checkpoint
             get_cuda_rng_tracker = deepspeed.checkpointing.get_cuda_rng_tracker
+            get_cpu_rng_tracker = deepspeed.checkpointing.get_cpus_rng_tracker
             checkpoint = deepspeed.checkpointing.checkpoint
 
     def forward(self, hidden_states, attention_mask, layer_past=None,
@@ -359,10 +360,14 @@ class ParallelAttention(MegatronModule):
 
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
-        #with mpu.get_cuda_rng_tracker().fork():
         if args.use_timer:
             timers('attention_dropout').start()
-        attention_probs = self.attention_dropout(attention_probs)
+        if not args.no_cuda:
+            with mpu.get_cuda_rng_tracker().fork():
+                attention_probs = self.attention_dropout(attention_probs)
+        else:
+            with mpu.get_cpus_rng_tracker().fork():
+                attention_probs = self.attention_dropout(attention_probs)
         if args.use_timer:
             timers('attention_dropout').stop()
 
@@ -760,8 +765,9 @@ class ParallelTransformer(MegatronModule):
                 eps=args.layernorm_epsilon)
 
         if deepspeed.checkpointing.is_configured():
-            global get_cuda_rng_tracker, checkpoint
+            global get_cuda_rng_tracker, get_cpus_rng_tracker, checkpoint
             get_cuda_rng_tracker = deepspeed.checkpointing.get_cuda_rng_tracker
+            get_cpus_rng_tracker = deepspeed.checkpointing.get_cpus_rng_tracker
             checkpoint = deepspeed.checkpointing.checkpoint
     def _get_layer(self, layer_number):
         return self.layers[layer_number]

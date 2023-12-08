@@ -180,14 +180,17 @@ def setup_deepspeed_random_and_activation_checkpointing(args):
 
     mpu.checkpoint = deepspeed.checkpointing.checkpoint
     mpu.get_cuda_rng_tracker = deepspeed.checkpointing.get_cuda_rng_tracker
-    mpu.model_parallel_cuda_manual_seed = deepspeed.checkpointing.model_parallel_cuda_manual_seed
-
+    mpu.get_cpus_rng_tracker = deepspeed.checkpointing.get_cpus_rng_tracker
+    if not args.no_cuda:
+        mpu.model_parallel_cuda_manual_seed = deepspeed.checkpointing.model_parallel_cuda_manual_seed
+    else:
+        mpu.model_parallel_cpus_manual_seed = deepspeed.checkpointing.model_parallel_cpus_manual_seed
 
 def _initialize_distributed():
     """Initialize torch.distributed and mpu."""
     args = get_args()
-    #device_count = torch.cuda.device_count()
-    device_count = 1
+    device_count = torch.cuda.device_count()
+
     if torch.distributed.is_initialized():
 
         if args.rank == 0:
@@ -202,15 +205,12 @@ def _initialize_distributed():
         # Manually set the device ids.
         if device_count > 0:
             device = args.rank % device_count
-            """
             if args.local_rank is not None:
                 assert args.local_rank == device, \
                     'expected local-rank to be the same as rank % device-count.'
             else:
                 args.local_rank = device
-            """
-
-            # torch.cuda.set_device(device) # only do so when device_count > 0
+            torch.cuda.set_device(device) # only do so when device_count > 0
 
         # Call the init process
         init_method = 'tcp://'
@@ -227,13 +227,12 @@ def _initialize_distributed():
                 init_method=init_method)
     # Set the tensor model-parallel, pipeline model-parallel, and
     # data-parallel communicators.
-    if device_count > 0:
-        if mpu.model_parallel_is_initialized():
-            print('model parallel is already initialized')
-        else:
-            mpu.initialize_model_parallel(args.tensor_model_parallel_size,
-                                          args.pipeline_model_parallel_size,
-                                          args.virtual_pipeline_model_parallel_size)
+    if mpu.model_parallel_is_initialized():
+        print('model parallel is already initialized')
+    else:
+        mpu.initialize_model_parallel(args.tensor_model_parallel_size,
+                                      args.pipeline_model_parallel_size,
+                                      args.virtual_pipeline_model_parallel_size)
 
     if args.deepspeed and args.deepspeed_activation_checkpointing:
         setup_deepspeed_random_and_activation_checkpointing(args)
@@ -251,17 +250,17 @@ def _init_autoresume():
 def _set_random_seed(seed_):
     """Set random seed for reproducability."""
     if seed_ is not None and seed_ > 0:
+        args = get_args()
+
         # Ensure that different pipeline MP stages get different seeds.
-        # No need to do so for CPU-only case.
-        if get_accelerator().device_count() == 0:
-            seed = seed_
-        else:
-            seed = seed_ + (100 * mpu.get_pipeline_model_parallel_rank())
+        seed = seed_ + (100 * mpu.get_pipeline_model_parallel_rank())
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
-        if get_accelerator().device_count() > 0:
+        if not args.no_cuda:
             mpu.model_parallel_cuda_manual_seed(seed)
+        else:
+            mpu.model_parallel_cpus_manual_seed(seed)
     else:
         raise ValueError('Seed ({}) should be a positive integer.'.format(seed))
 
