@@ -8,6 +8,8 @@ jobs/
 *.stats
 timer/
 output.*
+llio_transfer*
+.d*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
