@@ -11,8 +11,6 @@
 #PJM -j
 #PJM -S
 
-set -e
-
 # excute env
 /home/system/tool/dir_transfer /data/hp190122/share/PyTorch-1.10.1
 
@@ -20,7 +18,6 @@ set -e
 llio_transfer /home/u11887/work/DeepSpeedFugaku/pretrain_gpt.py
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/llm-jp-tokenizer
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/megatron
-/home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/experiments
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/DeepSpeed
 /home/system/tool/dir_transfer /home/u11887/work/DeepSpeedFugaku/scripts
 /home/system/tool/dir_transfer /vol0003/hp190122/data/users/u11887/work/.local/lib/
