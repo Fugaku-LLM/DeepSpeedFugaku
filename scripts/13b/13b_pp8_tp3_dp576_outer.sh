@@ -47,6 +47,10 @@ llio_transfer /home/u11890/work/training/DeepSpeedFugaku/pretrain_gpt.py
 /home/system/tool/dir_transfer /home/u11890/work/training/DeepSpeedFugaku/scripts
 
 mpirun -n ${num_node} \
+  -mca common_tofu_use_memory_pool 1 \
+  -x PATH \
+  -x WANDB_INIT_TIMEOUT=3600 \
+  -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
   --vcoordfile /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj \
-  bash 13b_pp8_tp3_dp576_inner.sh ${param_name} "${LP}"
+  bash 13b_pp8_tp3_dp576_inner.sh "${LP}"
