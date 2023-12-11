@@ -39,7 +39,7 @@ if [ $(($MICRO_BATCH_SIZE * $DATA_PARALLEL_SIZE)) -ne $GLOBAL_BATCH_SIZE ]; then
 fi
 
 # checkpoint setting
-CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/gbs${GLOBAL_BATCH_SIZE}
+CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/gbs${GLOBAL_BATCH_SIZE}
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
