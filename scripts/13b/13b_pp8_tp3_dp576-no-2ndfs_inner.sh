@@ -43,7 +43,7 @@ CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code1
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
-DATASET_PATH=/2ndfs/hp230254/u11887/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+DATASET_PATH=/data/hp190122/share/dataset/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -187,4 +187,4 @@ numactl -m 4-7 -N 4-7 \
   --use-flush-denormal \
   --wandb-entity "gpt-fugaku" \
   --wandb-project "13B-2023-12-12" \
-  --wandb-name "13b_dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}_gbs${GLOBAL_BATCH_SIZE}"
+  --wandb-name "13b_dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}_gbs${GLOBAL_BATCH_SIZE}-no-2ndfs"

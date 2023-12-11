@@ -1,7 +1,7 @@
 #!/bin/bash -x
-#PJM -L "rscunit=rscunit_ft01,rscgrp=rt"
+#PJM -L "rscunit=rscunit_ft01,rscgrp=ppu2023"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=815:00:00
+#PJM -L elapse=1:00:00:00
 #PJM -L "node=48x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
@@ -36,7 +36,7 @@ mpirun -n ${num_node} /home/u11890/work/rankmap/fjmpi_6d_to_3d.out /home/u11890/
 
 llio_transfer --purge /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
 
-llio_transfer 13b_pp8_tp3_dp576_inner.sh
+llio_transfer 13b_pp8_tp3_dp576-no-2ndfs_inner.sh
 llio_transfer /home/u11890/work/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
 
 # execute python code
@@ -53,4 +53,4 @@ mpirun -n ${num_node} \
   -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
   --vcoordfile /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj \
-  bash 13b_pp8_tp3_dp576_inner.sh "${LP}"
+  bash 13b_pp8_tp3_dp576-no-2ndfs_inner.sh "${LP}"
