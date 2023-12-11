@@ -49,7 +49,7 @@ PIPELINE_MODEL_PARALLEL_SIZE=8
 TENSOR_MODEL_PARALLEL_SIZE=3
 
 MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=1728
+GLOBAL_BATCH_SIZE=2304
 
 # gradinet accumulation size
 if [ $(($MICRO_BATCH_SIZE * $DATA_PARALLEL_SIZE)) -ne $GLOBAL_BATCH_SIZE ]; then
@@ -68,87 +68,78 @@ CHECKPOINT_PATH=/data/hp190122/share/fujii/checkpoints/gpt-fugaku-dataset/code10
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
-DATASET_PATH=/data/hp190122/share/dataset/llm-jp-corpus-v1.0.2/v2_2-code10k_en20k_ja30k
+DATASET_PATH=/data/hp190122/share/dataset/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
 
 # train data setting
 TRAIN_DATA_PATH=""
 
-# japanese wikipedia
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 1593695182 ${DATASET_PATH}/ja_wiki_merged_train_0_text_document"
-# english wikipedia
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 5084807913 ${DATASET_PATH}/en_wiki_merged_train_0_text_document"
-# japanese cc
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9775284297 ${DATASET_PATH}/ja_cc_merged_train_0_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9756689602 ${DATASET_PATH}/ja_cc_merged_train_1_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9786250625 ${DATASET_PATH}/ja_cc_merged_train_2_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9777791915 ${DATASET_PATH}/ja_cc_merged_train_3_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9765518836 ${DATASET_PATH}/ja_cc_merged_train_4_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9769646834 ${DATASET_PATH}/ja_cc_merged_train_5_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9777598507 ${DATASET_PATH}/ja_cc_merged_train_6_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9785135661 ${DATASET_PATH}/ja_cc_merged_train_7_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9778664499 ${DATASET_PATH}/ja_cc_merged_train_8_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9620536780 ${DATASET_PATH}/ja_cc_merged_train_9_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9784389547 ${DATASET_PATH}/ja_cc_merged_train_10_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9779047758 ${DATASET_PATH}/ja_cc_merged_train_11_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9781273054 ${DATASET_PATH}/ja_cc_merged_train_12_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9779274519 ${DATASET_PATH}/ja_cc_merged_train_13_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9590208758 ${DATASET_PATH}/ja_cc_merged_train_14_text_document"
+# en books
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 21533774460 ${DATASET_PATH}/books_merged_text_document"
+# en arxiv
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14300397157 ${DATASET_PATH}/lumi_en_arxiv_merge_text_document"
+# en falcon (refined-web)
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 11253894954 ${DATASET_PATH}/lumi_en_falcon_merge_text_document"
+# en pile free-law
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 11955669467 ${DATASET_PATH}/pile_FreeLaw_merge_text_document"
+# en pile pubmed
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 5308757461 ${DATASET_PATH}/pile_pubmed_merge_text_document"
+# en red-pajama cc
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 31674422340 ${DATASET_PATH}/red_pajama_cc_merge_text_document"
+# en red-pajama arxiv
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9562707240 ${DATASET_PATH}/red_pajama_arxiv_merge_text_document"
+# en 10_k
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 369623371 ${DATASET_PATH}/10_k_text_document"
+# en atticus is contracts and legal
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
+# en pile philarchive
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 347850794 ${DATASET_PATH}/pile_PhilArchive_text_document"
+# en pile nih text
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 422999727 ${DATASET_PATH}/pile_NIH_text_document"
+# en parliament
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 133677757 ${DATASET_PATH}/parliament_text_document"
+# en climabench
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9218044 ${DATASET_PATH}/climabench_text_document"
+# en redpajama-stackexchange
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 4602769439 ${DATASET_PATH}/red_pajama_stackexchange_text_document"
+# en pile stackexchange
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 2588691546 ${DATASET_PATH}/pile_stackexchange_text_document"
+# en pile uspto
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 6484246795 ${DATASET_PATH}/pile_uspto_merge_text_document"
+# en wiki
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 5084807913 ${DATASET_PATH}/en_wiki_merged_text_document"
 
-# english pile
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3390882396 ${DATASET_PATH}/en_pile_merged_train_0_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3377542797 ${DATASET_PATH}/en_pile_merged_train_1_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3378903914 ${DATASET_PATH}/en_pile_merged_train_2_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3411700284 ${DATASET_PATH}/en_pile_merged_train_3_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3406369579 ${DATASET_PATH}/en_pile_merged_train_4_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3408234653 ${DATASET_PATH}/en_pile_merged_train_5_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3393537510 ${DATASET_PATH}/en_pile_merged_train_6_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3378628450 ${DATASET_PATH}/en_pile_merged_train_7_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3414266377 ${DATASET_PATH}/en_pile_merged_train_8_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3415215745 ${DATASET_PATH}/en_pile_merged_train_9_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3373992692 ${DATASET_PATH}/en_pile_merged_train_10_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3385585842 ${DATASET_PATH}/en_pile_merged_train_11_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3378092975 ${DATASET_PATH}/en_pile_merged_train_12_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3390762623 ${DATASET_PATH}/en_pile_merged_train_13_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3372460710 ${DATASET_PATH}/en_pile_merged_train_14_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3388037651 ${DATASET_PATH}/en_pile_merged_train_15_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3379301168 ${DATASET_PATH}/en_pile_merged_train_16_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3398322457 ${DATASET_PATH}/en_pile_merged_train_17_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3387856841 ${DATASET_PATH}/en_pile_merged_train_18_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3398437994 ${DATASET_PATH}/en_pile_merged_train_19_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3378120478 ${DATASET_PATH}/en_pile_merged_train_20_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3324873160 ${DATASET_PATH}/en_pile_merged_train_21_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3398887298 ${DATASET_PATH}/en_pile_merged_train_22_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3383242566 ${DATASET_PATH}/en_pile_merged_train_23_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3376140562 ${DATASET_PATH}/en_pile_merged_train_24_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3399056755 ${DATASET_PATH}/en_pile_merged_train_25_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3370639761 ${DATASET_PATH}/en_pile_merged_train_26_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3390144908 ${DATASET_PATH}/en_pile_merged_train_27_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3378417197 ${DATASET_PATH}/en_pile_merged_train_28_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3384487188 ${DATASET_PATH}/en_pile_merged_train_29_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3385287883 ${DATASET_PATH}/en_pile_merged_train_30_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3382520341 ${DATASET_PATH}/en_pile_merged_train_31_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3405202461 ${DATASET_PATH}/en_pile_merged_train_32_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3412913401 ${DATASET_PATH}/en_pile_merged_train_33_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3425156752 ${DATASET_PATH}/en_pile_merged_train_34_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3396089610 ${DATASET_PATH}/en_pile_merged_train_35_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3376351472 ${DATASET_PATH}/en_pile_merged_train_36_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3386901071 ${DATASET_PATH}/en_pile_merged_train_37_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3382546054 ${DATASET_PATH}/en_pile_merged_train_38_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3385464281 ${DATASET_PATH}/en_pile_merged_train_39_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3385837582 ${DATASET_PATH}/en_pile_merged_train_40_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 3412400983 ${DATASET_PATH}/en_pile_merged_train_41_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 467384042 ${DATASET_PATH}/en_pile_merged_train_42_text_document"
+# ja wiki
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 1593695182 ${DATASET_PATH}/ja_wiki_merged_text_document"
+# cyberagent filtered ja
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 31808623323 ${DATASET_PATH}/ca_filter2ca_cc_filtered_org-bwords_reform_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 22976439227 ${DATASET_PATH}/ca_filter2ca_cc2_filtered_org-bwords_text_document"
+# okazaki lab cc ja
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14184147835 ${DATASET_PATH}/split_reformat_0_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14440507382 ${DATASET_PATH}/split_reformat_1_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 13821488987 ${DATASET_PATH}/split_reformat_2_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 16717225516 ${DATASET_PATH}/split_reformat_3_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 16634821784 ${DATASET_PATH}/split_reformat_4_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 22117133216 ${DATASET_PATH}/split_reformat_5_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 25942389333 ${DATASET_PATH}/split_reformat_6_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 37326773828 ${DATASET_PATH}/split_reformat_7_text_document"
 
-# stack (code)
-# TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 77377944 ${DATASET_PATH}/code_stack_merged_train_0_text_document"
+# math llemma
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 11068009210 ${DATASET_PATH}/EleutherAI___proof-pile-2_algebraic-stack_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14680659112 ${DATASET_PATH}/EleutherAI___proof-pile-2_open-web-math_text_document"
+
+# code
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 16945303758 ${DATASET_PATH}/markdown_part_merge_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 2159043136 ${DATASET_PATH}/rust_part_merge_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 973518264 ${DATASET_PATH}/tex_part_merge_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10966015578 ${DATASET_PATH}/python_part_merge_text_document"
 
 # training setting
-train_token_in_billion=295.8020127
+train_token_in_billion=400
 train_token=$(echo "$train_token_in_billion * 1000 * 1000 * 1000" | bc)
 train_token=$(echo "$train_token/1" | bc)
 
-# default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens. we use 206 billion tokens, so we set 2.06 billion tokens to lr-warmup-tokens.
-lr_warmup_tokens_in_billion=2.95
+# default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens.
+lr_warmup_tokens_in_billion=4
 lr_warmup_tokens=$(echo "$lr_warmup_tokens_in_billion * 1000 * 1000 * 1000" | bc)
 lr_warmup_tokens=$(echo "$lr_warmup_tokens/1" | bc)
 
