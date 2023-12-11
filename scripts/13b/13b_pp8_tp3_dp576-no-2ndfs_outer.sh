@@ -1,7 +1,7 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=ppu2023"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=1:00:00:00
+#PJM -L elapse=24:00:00
 #PJM -L "node=48x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
