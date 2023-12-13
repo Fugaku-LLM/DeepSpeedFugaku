@@ -9,7 +9,7 @@ cd /home/u11890/work/training/DeepSpeedFugaku
 # distributed setting
 # Change for multinode config
 CPUS_PER_NODE=1 # fixed (Fugaku)
-NNODES=13824
+NNODES=24
 NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
@@ -19,7 +19,7 @@ export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
 TOKENIZER_PATH=llm-jp-tokenizer/models/ver2.2/code10K_en20K_ja30K.ver2.2.model
 
 # distributed setting
-DATA_PARALLEL_SIZE=576
+DATA_PARALLEL_SIZE=1
 PIPELINE_MODEL_PARALLEL_SIZE=8
 TENSOR_MODEL_PARALLEL_SIZE=3
 
@@ -43,7 +43,7 @@ CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code1
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
-DATASET_PATH=/2ndfs/hp230254/u11887/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+DATASET_PATH=/data/hp190122/share/dataset/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -65,7 +65,7 @@ TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9562707240 ${DATASET_PATH}/red_pajama_arxiv_
 # en 10_k
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 369623371 ${DATASET_PATH}/10_k_text_document"
 # en atticus is contracts and legal
-#TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
 # en pile philarchive
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 347850794 ${DATASET_PATH}/pile_PhilArchive_text_document"
 # en pile nih text

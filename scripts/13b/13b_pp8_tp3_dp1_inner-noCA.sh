@@ -9,7 +9,7 @@ cd /home/u11890/work/training/DeepSpeedFugaku
 # distributed setting
 # Change for multinode config
 CPUS_PER_NODE=1 # fixed (Fugaku)
-NNODES=13824
+NNODES=24
 NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
@@ -19,7 +19,7 @@ export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
 TOKENIZER_PATH=llm-jp-tokenizer/models/ver2.2/code10K_en20K_ja30K.ver2.2.model
 
 # distributed setting
-DATA_PARALLEL_SIZE=576
+DATA_PARALLEL_SIZE=1
 PIPELINE_MODEL_PARALLEL_SIZE=8
 TENSOR_MODEL_PARALLEL_SIZE=3
 
@@ -65,7 +65,7 @@ TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9562707240 ${DATASET_PATH}/red_pajama_arxiv_
 # en 10_k
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 369623371 ${DATASET_PATH}/10_k_text_document"
 # en atticus is contracts and legal
-#TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
+TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
 # en pile philarchive
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 347850794 ${DATASET_PATH}/pile_PhilArchive_text_document"
 # en pile nih text
@@ -86,8 +86,8 @@ TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 5084807913 ${DATASET_PATH}/en_wiki_merged_te
 # ja wiki
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 1593695182 ${DATASET_PATH}/ja_wiki_merged_text_document"
 # cyberagent filtered ja
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 31808623323 ${DATASET_PATH}/ca_filter2ca_cc_filtered_org-bwords_reform_text_document"
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 22976439227 ${DATASET_PATH}/ca_filter2ca_cc2_filtered_org-bwords_text_document"
+#TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 31808623323 ${DATASET_PATH}/ca_filter2ca_cc_filtered_org-bwords_reform_text_document"
+#TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 22976439227 ${DATASET_PATH}/ca_filter2ca_cc2_filtered_org-bwords_text_document"
 # okazaki lab cc ja
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14184147835 ${DATASET_PATH}/split_reformat_0_text_document"
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 14440507382 ${DATASET_PATH}/split_reformat_1_text_document"

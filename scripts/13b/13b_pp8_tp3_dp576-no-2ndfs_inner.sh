@@ -65,7 +65,7 @@ TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 9562707240 ${DATASET_PATH}/red_pajama_arxiv_
 # en 10_k
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 369623371 ${DATASET_PATH}/10_k_text_document"
 # en atticus is contracts and legal
-TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
+#TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 10696864 ${DATASET_PATH}/atticus_cuad_muad_contracts_text_document"
 # en pile philarchive
 TRAIN_DATA_PATH="${TRAIN_DATA_PATH} 347850794 ${DATASET_PATH}/pile_PhilArchive_text_document"
 # en pile nih text
