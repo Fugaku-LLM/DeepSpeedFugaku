@@ -2,14 +2,14 @@
 
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
-tar xf /home/u11890/work/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
+tar xf /vol0005/mdt3/share/hp230254/pytorch/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
 source /local/fcc/inst/venv/bin/activate
 cd /home/u11890/work/training/DeepSpeedFugaku
 
 # distributed setting
 # Change for multinode config
 CPUS_PER_NODE=1 # fixed (Fugaku)
-NNODES=24
+NNODES=13824
 NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
@@ -19,9 +19,9 @@ export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
 TOKENIZER_PATH=llm-jp-tokenizer/models/ver2.2/code10K_en20K_ja30K.ver2.2.model
 
 # distributed setting
-DATA_PARALLEL_SIZE=1
-PIPELINE_MODEL_PARALLEL_SIZE=8
-TENSOR_MODEL_PARALLEL_SIZE=3
+DATA_PARALLEL_SIZE=576
+PIPELINE_MODEL_PARALLEL_SIZE=4
+TENSOR_MODEL_PARALLEL_SIZE=6
 
 MICRO_BATCH_SIZE=1
 GLOBAL_BATCH_SIZE=2304
