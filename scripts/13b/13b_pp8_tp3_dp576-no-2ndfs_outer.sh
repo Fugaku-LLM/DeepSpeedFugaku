@@ -25,7 +25,7 @@ gbs=2304
 num_node=13824
 hostfile_name="24x2x24x2x3x2_tp${tp}dp${dp}pp${pp}"
 param_name="13b_pp${pp}_tp${tp}_dp${dp}_fjpytorch_rankmap_gbs${gbs}"
-stdproc_name="jobs/${param_name}/outs/${PJM_JOBID}_n/stdproc"
+stdproc_name="jobs/${param_name}/output.%j/%m/%/1000r/stdproc"
 LP="/local/fcc/inst/other/lib/libtcmalloc.so"
 
 rm /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
@@ -37,7 +37,7 @@ mpirun -n ${num_node} /home/u11890/work/rankmap/fjmpi_6d_to_3d.out /home/u11890/
 llio_transfer --purge /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
 
 llio_transfer 13b_pp8_tp3_dp576-no-2ndfs_inner.sh
-llio_transfer /home/u11890/work/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
+llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
 
 # execute python code
 llio_transfer /home/u11890/work/training/DeepSpeedFugaku/pretrain_gpt.py
