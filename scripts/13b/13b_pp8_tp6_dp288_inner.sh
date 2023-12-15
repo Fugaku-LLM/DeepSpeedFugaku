@@ -140,6 +140,8 @@ train_samples=$((300 * 1000000000 * 2 / ${SEQUENCE_LENGTH}))
 
 numactl -m 4-7 -N 4-7 \
   python pretrain_gpt.py \
+  --no-load-rng \
+  --seed 42 \
   --num-layers 40 \
   --hidden-size 5184 \
   --num-attention-heads 36 \

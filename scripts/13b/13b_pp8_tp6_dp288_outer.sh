@@ -1,7 +1,7 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=rt"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=761:00:00
+#PJM -L elapse=734:00:00
 #PJM -L "node=48x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
@@ -44,7 +44,6 @@ llio_transfer /home/u11890/work/training/DeepSpeedFugaku/pretrain_gpt.py
 /home/system/tool/dir_transfer /home/u11890/work/training/DeepSpeedFugaku/llm-jp-tokenizer
 /home/system/tool/dir_transfer /home/u11890/work/training/DeepSpeedFugaku/megatron
 /home/system/tool/dir_transfer /home/u11890/work/training/DeepSpeedFugaku/DeepSpeed
-/home/system/tool/dir_transfer /home/u11890/work/training/DeepSpeedFugaku/scripts
 
 mpirun -n ${num_node} \
   -mca common_tofu_use_memory_pool 1 \
