@@ -43,7 +43,16 @@ CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code1
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
-DATASET_PATH=/2ndfs/hp230254/u11887/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+DATASET_PATH_LIST=(
+    /2ndfs/hp230254/u11887/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+    /vol0503/data/hp230254/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+)
+
+# read from multiple volumes
+DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
+
+# read from single volume
+# DATASET_PATH=${DATASET_PATH_LIST[0]}
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -141,7 +150,6 @@ train_samples=$((300 * 1000000000 * 2 / ${SEQUENCE_LENGTH}))
 numactl -m 4-7 -N 4-7 \
   python pretrain_gpt.py \
   --no-load-rng \
-  --seed 42 \
   --num-layers 40 \
   --hidden-size 5184 \
   --num-attention-heads 36 \
