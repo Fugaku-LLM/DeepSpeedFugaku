@@ -1300,10 +1300,10 @@ def train(
     while iteration < args.train_iters and (
         args.train_tokens is None or args.consumed_train_tokens < args.train_tokens
     ):
-        if iteration == 1023:
-            if mpu.get_tensor_model_parallel_rank() == 0:
-                for _ in range(args.micro_batch_size *get_num_microbatches()*5):
-                    _ = next(train_data_iterator)
+#        if iteration == 1023:
+#            if mpu.get_tensor_model_parallel_rank() == 0:
+#                for _ in range(args.micro_batch_size *get_num_microbatches()*100):
+#                    _ = next(train_data_iterator)
         update_num_microbatches(args.consumed_train_samples)
         if args.deepspeed:
             # inform deepspeed of any batch size changes
