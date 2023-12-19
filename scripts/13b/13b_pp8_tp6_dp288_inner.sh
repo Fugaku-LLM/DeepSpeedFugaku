@@ -170,6 +170,7 @@ numactl -m 4-7 -N 4-7 \
   --distributed-backend mpi \
   --init-method-std 0.008 \
   --lr 2.0e-5 \
+  --override-lr-scheduler \
   --min-lr 1.0e-6 \
   --lr-decay-style cosine \
   --weight-decay 0.1 \
