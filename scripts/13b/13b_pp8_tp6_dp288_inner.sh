@@ -39,7 +39,7 @@ if [ $(($MICRO_BATCH_SIZE * $DATA_PARALLEL_SIZE)) -ne $GLOBAL_BATCH_SIZE ]; then
 fi
 
 # checkpoint setting
-CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/gbs${GLOBAL_BATCH_SIZE}_v2
+CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
@@ -49,10 +49,10 @@ DATASET_PATH_LIST=(
 )
 
 # read from multiple volumes
-DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
+# DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
 
 # read from single volume
-# DATASET_PATH=${DATASET_PATH_LIST[0]}
+DATASET_PATH=${DATASET_PATH_LIST[1]}
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -123,7 +123,7 @@ train_token=$(echo "$train_token_in_billion * 1000 * 1000 * 1000" | bc)
 train_token=$(echo "$train_token/1" | bc)
 
 # default megatron-deepspeed confgiraution is 3000 million, but they train model using 300 billion tokens.
-lr_warmup_tokens_in_billion=20
+lr_warmup_tokens_in_billion=4
 lr_warmup_tokens=$(echo "$lr_warmup_tokens_in_billion * 1000 * 1000 * 1000" | bc)
 lr_warmup_tokens=$(echo "$lr_warmup_tokens/1" | bc)
 
@@ -160,8 +160,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH \
-  --load $CHECKPOINT_PATH \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v3 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v2 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
@@ -169,7 +169,7 @@ numactl -m 4-7 -N 4-7 \
   --split 949,51,0 \
   --distributed-backend mpi \
   --init-method-std 0.008 \
-  --lr 1.0e-4 \
+  --lr 2.0e-5 \
   --min-lr 1.0e-6 \
   --lr-decay-style cosine \
   --weight-decay 0.1 \
