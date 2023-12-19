@@ -113,15 +113,15 @@ class MegatronOptimizer(ABC):
 
     def scale_loss(self, loss):
         """Simple scaling."""
-        try:
-            scaled_loss = self.get_loss_scale() * loss
-        except Exception as e:
-            with open(f'loss_dump{torch.distributed.get_rank()}.pkl', 'wb') as f:
-                import pickle
-                pickle.dump(loss, f)
-            print(loss.dtype,flush=True)
-            print(loss,flush=True)
-            raise e
+        #try:
+        scaled_loss = self.get_loss_scale() * loss
+        #except Exception as e:
+        #    with open(f'loss_dump{torch.distributed.get_rank()}.pkl', 'wb') as f:
+        #        import pickle
+        #        pickle.dump(loss, f)
+        #    print(loss.dtype,flush=True)
+        #    print(loss,flush=True)
+        #    raise e
         return scaled_loss
 
 
