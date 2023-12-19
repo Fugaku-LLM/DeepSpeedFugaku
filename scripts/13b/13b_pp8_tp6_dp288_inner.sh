@@ -2,7 +2,7 @@
 
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
-tar xf /vol0503/share/hp230254/pytorch/1702716401.910536560.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
+tar xf /vol0005/mdt3/share/hp230254/pytorch/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
 source /local/fcc/inst/venv/bin/activate
 cd /home/u11890/work/training/DeepSpeedFugaku
 
