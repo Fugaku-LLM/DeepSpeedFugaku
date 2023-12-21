@@ -140,7 +140,7 @@ MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
 PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
-NoCAPipe=5
+NoCAPipe=4
 SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
 if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
   echo "Cehckpoint-activation: off"
@@ -170,8 +170,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v3 \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v2 \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v4 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v3 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
