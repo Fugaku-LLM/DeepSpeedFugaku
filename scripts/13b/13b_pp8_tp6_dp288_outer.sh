@@ -1,7 +1,7 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=rt"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=600:00:00
+#PJM -L elapse=567:00:00
 #PJM -L "node=48x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
@@ -59,8 +59,6 @@ mpirun -n ${num_node} \
   -x WANDB_INIT_TIMEOUT=3600 \
   -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
+  --vcoordfile /vol0003/share/hp190122/rankmap/vcoordfile_${hostfile_name}_fj \
   bash 13b_pp8_tp6_dp288_inner.sh "${LP}"
-
-#  --vcoordfile /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj \
-
 
