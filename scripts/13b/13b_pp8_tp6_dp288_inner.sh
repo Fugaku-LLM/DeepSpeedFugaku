@@ -150,6 +150,8 @@ PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
   CHECKPOINT_ACTIVATIONS="--checkpoint-activations"
 #fi
 
+USE_CACHED_DATASET="--use-cached-dataset"
+
 export OMP_NUM_THREADS=48
 export LD_PRELOAD=$1
 export MYGEMM=99
@@ -206,6 +208,7 @@ numactl -m 4-7 -N 4-7 \
   --log-timers-to-tensorboard \
   --log-optimizer-states-to-tensorboard \
   --use-flush-denormal \
+  $USE_CACHED_DATASET \
   --wandb-entity "gpt-fugaku" \
   --wandb-project "13B-2023-12-12" \
   --wandb-name "13b_dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}_gbs${GLOBAL_BATCH_SIZE}"
