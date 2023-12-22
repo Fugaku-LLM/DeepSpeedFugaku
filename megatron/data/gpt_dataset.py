@@ -236,8 +236,8 @@ def _build_index_mappings(name, data_prefix, documents, sizes,
     """
     args = get_args()
     # Number of tokens in each epoch and number of required epochs.
-    tokens_per_epoch = _num_tokens(documents, sizes)
-    num_epochs = _num_epochs(tokens_per_epoch, seq_length, num_samples)
+    tokens_per_epoch = None  # compute only when building indexed mapping
+    num_epochs = None        # compute only when building indexed mapping
     # rng state
     np_rng = np.random.RandomState(seed=seed)
 
@@ -272,6 +272,10 @@ def _build_index_mappings(name, data_prefix, documents, sizes,
 
             print_rank_0(' > WARNING: could not find index map files, building '
                          'the indices on rank 0 ...')
+
+            if num_epochs is None:
+                tokens_per_epoch = _num_tokens(documents, sizes)
+                num_epochs = _num_epochs(tokens_per_epoch, seq_length, num_samples)
 
             # For the last epoch, decide whether include the entire epoch
             # in the global shuffle or not.

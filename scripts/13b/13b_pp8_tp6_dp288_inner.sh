@@ -49,10 +49,10 @@ DATASET_PATH_LIST=(
 )
 
 # read from multiple volumes
-# DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
+DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
 
 # read from single volume
-DATASET_PATH=${DATASET_PATH_LIST[1]}
+# DATASET_PATH=${DATASET_PATH_LIST[1]}
 
 # train data setting
 TRAIN_DATA_PATH=""
