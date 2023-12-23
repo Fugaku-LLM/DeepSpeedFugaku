@@ -2,7 +2,7 @@
 
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
-tar xf /vol0005/mdt3/share/hp230254/pytorch/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
+tar xf /vol0005/mdt3/share/hp230254/pytorch/1702716401.910536560.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
 source /local/fcc/inst/venv/bin/activate
 cd /vol0001/hp230254/u10270/DeepSpeedFugaku_3
 
@@ -179,7 +179,7 @@ numactl -m 4-7 -N 4-7 \
   --split 949,51,0 \
   --distributed-backend mpi \
   --init-method-std 0.008 \
-  --lr 1.5e-5 \
+  --lr 2.0e-5 \
   --override-lr-scheduler \
   --no-load-lr-state \
   --min-lr 1.0e-6 \
