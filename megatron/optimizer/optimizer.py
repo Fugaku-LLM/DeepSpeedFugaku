@@ -511,6 +511,23 @@ class FP32Optimizer(MegatronOptimizer):
                 for param in param_group['params']:
                     param.grad = param.main_grad
 
+        found_inf_flag = False
+        for param_group in self.optimizer.param_groups:
+            for param in param_group['params']:
+                found_inf_flag = torch.any(torch.isnan(param.grad))
+                if found_inf_flag:
+                    break
+            if found_inf_flag:
+                break
+
+        found_inf_flag = torch.tensor(1) if found_inf_flag else torch.tensor(0)
+        torch.distributed.all_reduce(found_inf_flag,
+                                     op=torch.distributed.ReduceOp.MAX,
+                                     group=mpu.get_model_parallel_group())
+
+        if torch.is_nonzero(found_inf_flag):
+            return False, None, None
+
         # Clip gradients.
         grad_norm = None
         if self.clip_grad > 0.0:
