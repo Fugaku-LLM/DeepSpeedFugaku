@@ -140,15 +140,15 @@ MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
 PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
-NoCAPipe=4
-SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
-if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
-  echo "Cehckpoint-activation: off"
-  CHECKPOINT_ACTIVATIONS=""
-else
-  echo "Cehckpoint-activation: on"
+# NoCAPipe=4
+# SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
+# if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
+#   echo "Cehckpoint-activation: off"
+#   CHECKPOINT_ACTIVATIONS=""
+# else
+#   echo "Cehckpoint-activation: on"
   CHECKPOINT_ACTIVATIONS="--checkpoint-activations"
-fi
+# fi
 
 export OMP_NUM_THREADS=48
 export LD_PRELOAD=$1
