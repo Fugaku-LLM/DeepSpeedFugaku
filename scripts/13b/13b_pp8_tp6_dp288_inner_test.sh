@@ -2,7 +2,7 @@
 
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
-tar xf /vol0005/mdt3/share/hp230254/pytorch/1701935794.711074240.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
+tar xf /vol0005/mdt3/share/hp230254/pytorch/1702716401.910536560.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
 source /local/fcc/inst/venv/bin/activate
 cd /home/u11890/work/training/DeepSpeedFugaku
 
@@ -170,7 +170,7 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v3 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v4 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
