@@ -14,7 +14,6 @@ NODE_RANK=0
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
-
 # Tokenizer setting
 TOKENIZER_PATH=llm-jp-tokenizer/models/ver2.2/code10K_en20K_ja30K.ver2.2.model
 
@@ -170,8 +169,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v5 \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v4 \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_15e-6 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_15e-6 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
@@ -179,7 +178,7 @@ numactl -m 4-7 -N 4-7 \
   --split 949,51,0 \
   --distributed-backend mpi \
   --init-method-std 0.008 \
-  --lr 2.0e-5 \
+  --lr 1.5e-5 \
   --override-lr-scheduler \
   --no-load-lr-state \
   --min-lr 1.0e-6 \
