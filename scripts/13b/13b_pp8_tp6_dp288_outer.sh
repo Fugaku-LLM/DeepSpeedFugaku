@@ -1,7 +1,7 @@
 #!/bin/bash -x
 #PJM -L "rscunit=rscunit_ft01,rscgrp=rt"
 #PJM --rsc-list "proc-openfd=65536"
-#PJM -L elapse=480:00:00
+#PJM -L elapse=450:00:00
 #PJM -L "node=48x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
@@ -55,6 +55,7 @@ echo "end llio_transfer dataset idx" `date`
 
 mpirun -n ${num_node} \
   -mca common_tofu_use_memory_pool 1 \
+  -mca coll_base_reduce_commute_safe 1 \
   -x PATH \
   -x WANDB_INIT_TIMEOUT=3600 \
   -x WANDB__SERVICE_WAIT=3600 \
