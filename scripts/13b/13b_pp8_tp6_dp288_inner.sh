@@ -169,8 +169,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v6 \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v6 \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v10 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v10 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
