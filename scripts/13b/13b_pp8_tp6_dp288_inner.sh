@@ -2,7 +2,7 @@
 
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
-tar xf /vol0005/mdt3/share/hp230254/pytorch/1702716401.910536560.fcc.pytorch.y.r1.13_for_a64fx_fjBMMv201.tar.gz
+tar xf /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
 source /local/fcc/inst/venv/bin/activate
 cd /vol0001/hp230254/u10270/DeepSpeedFugaku_3
 
@@ -11,6 +11,7 @@ cd /vol0001/hp230254/u10270/DeepSpeedFugaku_3
 CPUS_PER_NODE=1 # fixed (Fugaku)
 NNODES=13824
 NODE_RANK=0
+export TMPDIR=$PJM_LOCALTMP
 export WORLD_SIZE=$(($CPUS_PER_NODE * $NNODES))
 export MASTER_ADDR=localhost
 export MASTER_PORT=$((10000 + ($PJM_JOBID % 50000)))
@@ -171,8 +172,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v10 \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v10 \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v20 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v20 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
@@ -180,7 +181,7 @@ numactl -m 4-7 -N 4-7 \
   --split 949,51,0 \
   --distributed-backend mpi \
   --init-method-std 0.008 \
-  --lr 2.0e-5 \
+  --lr 1.0e-4 \
   --override-lr-scheduler \
   --no-load-lr-state \
   --min-lr 1.0e-6 \
