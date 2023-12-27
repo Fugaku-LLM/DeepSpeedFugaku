@@ -236,8 +236,8 @@ def _build_index_mappings(name, data_prefix, documents, sizes,
     """
     args = get_args()
     # Number of tokens in each epoch and number of required epochs.
-    tokens_per_epoch = _num_tokens(documents, sizes)
-    num_epochs = _num_epochs(tokens_per_epoch, seq_length, num_samples)
+    tokens_per_epoch = None  # compute only when building indexed mapping
+    num_epochs = None        # compute only when building indexed mapping
     # rng state
     np_rng = np.random.RandomState(seed=seed)
 
@@ -270,8 +270,15 @@ def _build_index_mappings(name, data_prefix, documents, sizes,
            (not os.path.isfile(sample_idx_filename)) or \
            (not os.path.isfile(shuffle_idx_filename)):
 
+            assert args.use_cached_dataset != True, \
+                'There is no cached dataset even though --use-cached-dataset'
+
             print_rank_0(' > WARNING: could not find index map files, building '
                          'the indices on rank 0 ...')
+
+            if num_epochs is None:
+                tokens_per_epoch = _num_tokens(documents, sizes)
+                num_epochs = _num_epochs(tokens_per_epoch, seq_length, num_samples)
 
             # For the last epoch, decide whether include the entire epoch
             # in the global shuffle or not.
@@ -346,15 +353,16 @@ def _build_index_mappings(name, data_prefix, documents, sizes,
             print_rank_0(' > elasped time to build and save shuffle-idx mapping'
                          ' (seconds): {:4f}'.format(time.time() - start_time))
 
-    # This should be a barrier but nccl barrier assumes
-    # device_index=rank which is not the case for model
-    # parallel case
-    counts = torch.LongTensor([1])
-    torch.distributed.all_reduce(counts, group=mpu.get_data_parallel_group())
-    torch.distributed.all_reduce(counts, group=mpu.get_pipeline_model_parallel_group())
-    assert counts[0].item() == (
-        torch.distributed.get_world_size() //
-        torch.distributed.get_world_size(group=mpu.get_tensor_model_parallel_group()))
+    if not args.use_cached_dataset:
+        # This should be a barrier but nccl barrier assumes
+        # device_index=rank which is not the case for model
+        # parallel case
+        counts = torch.LongTensor([1])
+        torch.distributed.all_reduce(counts, group=mpu.get_data_parallel_group())
+        torch.distributed.all_reduce(counts, group=mpu.get_pipeline_model_parallel_group())
+        assert counts[0].item() == (
+            torch.distributed.get_world_size() //
+            torch.distributed.get_world_size(group=mpu.get_tensor_model_parallel_group()))
 
     # Load mappings.
     start_time = time.time()

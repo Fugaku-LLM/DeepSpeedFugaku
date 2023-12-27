@@ -45,13 +45,13 @@ llio_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/pretrain_gpt.py
 /home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/megatron
 /home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/DeepSpeed
 
-echo "begin llio_transfer dataset idx" `date`
-
-# transfer .idx files (12.7 GB)
-DATASET_PATH=/vol0503/data/hp230254/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
-find $DATASET_PATH -name "*.idx" | xargs -n 1 llio_transfer
-
-echo "end llio_transfer dataset idx" `date`
+#echo "begin llio_transfer dataset idx" `date`
+#
+## transfer .idx files (12.7 GB)
+#DATASET_PATH=/vol0503/data/hp230254/dataset/llm-jp-corpus-v1.0.2/fugaku_13b/binarized/v2_2-code10k_en20k_ja30k
+#find $DATASET_PATH -name "*.idx" | xargs -n 1 llio_transfer
+#
+#echo "end llio_transfer dataset idx" `date`
 
 mpirun -n ${num_node} \
   -mca common_tofu_use_memory_pool 1 \
