@@ -26,7 +26,7 @@ num_node=13824
 hostfile_name="24x2x24x2x3x2_tp${tp}dp${dp}pp${pp}"
 param_name="13b_pp${pp}_tp${tp}_dp${dp}_fjpytorch_rankmap_gbs${gbs}"
 stdproc_name="jobs/${param_name}/output.%j/%m/%/1000r/stdproc"
-LP="/local/fcc/inst/other/lib/libtcmalloc.so"
+LP="/local/fcc/inst/other/lib/libtcmalloc.so:/vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so"
 
 #rm /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
 
@@ -38,6 +38,7 @@ LP="/local/fcc/inst/other/lib/libtcmalloc.so"
 
 llio_transfer 13b_pp8_tp6_dp288_inner.sh
 llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
+llio_transfer /vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so
 
 # execute python code
 llio_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/pretrain_gpt.py
