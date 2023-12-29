@@ -2,7 +2,7 @@
 #PJM -L "rscunit=rscunit_ft01,rscgrp=rt"
 #PJM --rsc-list "proc-openfd=65536"
 #PJM -L elapse=150:00:00
-#PJM -L "node=24x6x48:torus:strict-io"
+#PJM -L "node=42x6x48:torus:strict-io"
 #PJM -L "freq=2200"
 #PJM -L "throttling_state=0"
 #PJM -L "issue_state=0"
@@ -20,10 +20,10 @@
 
 pp=8
 tp=6
-dp=144
+dp=252
 gbs=2016
-num_node=6912
-hostfile_name="12x2x24x2x3x2_tp${tp}dp${dp}pp${pp}"
+num_node=12096
+hostfile_name="21x2x24x2x3x2_tp${tp}dp${dp}pp${pp}"
 param_name="13b_pp${pp}_tp${tp}_dp${dp}_fjpytorch_rankmap_gbs${gbs}"
 stdproc_name="jobs/${param_name}/output.%j/%m/%/1000r/stdproc"
 #LP="/local/fcc/inst/other/lib/libtcmalloc.so"
@@ -41,7 +41,7 @@ mpirun -n ${num_node} /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out /vol050
 #llio_transfer --purge /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
 llio_transfer --purge /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
 
-llio_transfer 13b_pp8_tp6_dp144_inner.sh
+llio_transfer 13b_pp8_tp6_dp252_inner.sh
 llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
 llio_transfer /vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so
 
