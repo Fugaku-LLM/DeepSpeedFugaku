@@ -26,16 +26,20 @@ num_node=6912
 hostfile_name="12x2x24x2x3x2_tp${tp}dp${dp}pp${pp}"
 param_name="13b_pp${pp}_tp${tp}_dp${dp}_fjpytorch_rankmap_gbs${gbs}"
 stdproc_name="jobs/${param_name}/output.%j/%m/%/1000r/stdproc"
-LP="/local/fcc/inst/other/lib/libtcmalloc.so"
-# LP="/local/fcc/inst/other/lib/libtcmalloc.so:/vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so"
+#LP="/local/fcc/inst/other/lib/libtcmalloc.so"
+LP="/local/fcc/inst/other/lib/libtcmalloc.so:/vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so"
 
 #rm /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
+#rm /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
 
 #llio_transfer /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
+llio_transfer /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
 
 #mpirun -n ${num_node} /home/u11890/work/rankmap/fjmpi_6d_to_3d.out /home/u11890/work/rankmap/hostfile_${hostfile_name} /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
+mpirun -n ${num_node} /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out /vol0503/share/hp230254/rankmap/hostfile_${hostfile_name} /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
 
 #llio_transfer --purge /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
+llio_transfer --purge /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
 
 llio_transfer 13b_pp8_tp6_dp144_inner.sh
 llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
@@ -62,6 +66,7 @@ mpirun -n ${num_node} \
   -x WANDB_INIT_TIMEOUT=3600 \
   -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
+  --vcoordfile /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj \
   bash 13b_pp8_tp6_dp144_inner.sh "${LP}"
 
 # --vcoordfile /vol0003/share/hp190122/rankmap/vcoordfile_${hostfile_name}_fj \
