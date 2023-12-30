@@ -39,7 +39,7 @@ if [ $(($MICRO_BATCH_SIZE * $DATA_PARALLEL_SIZE)) -ne $GLOBAL_BATCH_SIZE ]; then
 fi
 
 # checkpoint setting
-CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/dp${DATA_PARALLEL_SIZE}_pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/
+CHECKPOINT_PATH=/data/hp190122/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp${PIPELINE_MODEL_PARALLEL_SIZE}_tp${TENSOR_MODEL_PARALLEL_SIZE}/
 mkdir -p $CHECKPOINT_PATH
 
 # dataset setting
@@ -172,8 +172,8 @@ numactl -m 4-7 -N 4-7 \
   --train-samples $train_samples \
   --lr-decay-tokens $lr_decay_tokens \
   --lr-warmup-tokens $lr_warmup_tokens \
-  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v20 \
-  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v20 \
+  --save $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v21 \
+  --load $CHECKPOINT_PATH/gbs${GLOBAL_BATCH_SIZE}_v21 \
   --data-path $TRAIN_DATA_PATH \
   --tokenizer-type JapaneseSentencePiece \
   --vocab-file $TOKENIZER_PATH \
