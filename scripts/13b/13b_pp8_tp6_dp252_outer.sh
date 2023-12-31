@@ -68,6 +68,6 @@ mpirun -n ${num_node} \
   -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
   --vcoordfile /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj \
-  bash 13b_pp8_tp6_dp144_inner.sh "${LP}"
+  bash 13b_pp8_tp6_dp252_inner.sh "${LP}"
 
 # --vcoordfile /vol0003/share/hp190122/rankmap/vcoordfile_${hostfile_name}_fj \
