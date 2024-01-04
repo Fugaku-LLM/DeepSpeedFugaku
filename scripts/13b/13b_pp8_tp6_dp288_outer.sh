@@ -41,10 +41,11 @@ llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pyto
 llio_transfer /vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so
 
 # execute python code
-llio_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/pretrain_gpt.py
-/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/llm-jp-tokenizer
-/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/megatron
-/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/DeepSpeed
+DSF_HOME=/vol0503/data/hp230254/u10270/DeepSpeedFugaku
+llio_transfer ${DSF_HOME}/pretrain_gpt.py
+/home/system/tool/dir_transfer ${DSF_HOME}/llm-jp-tokenizer
+/home/system/tool/dir_transfer ${DSF_HOME}/megatron
+/home/system/tool/dir_transfer ${DSF_HOME}/DeepSpeed
 
 #echo "begin llio_transfer dataset idx" `date`
 #
@@ -61,6 +62,6 @@ mpirun -n ${num_node} \
   -x WANDB_INIT_TIMEOUT=3600 \
   -x WANDB__SERVICE_WAIT=3600 \
   -std-proc ${stdproc_name} \
-  --vcoordfile /vol0003/share/hp190122/rankmap/vcoordfile_${hostfile_name}_fj \
+  --vcoordfile /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj \
   bash 13b_pp8_tp6_dp288_inner.sh "${LP}"
 

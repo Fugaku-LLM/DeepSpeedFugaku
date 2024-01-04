@@ -47,10 +47,11 @@ llio_transfer /vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100
 
 # execute python code
 # ([WARN] LLIO 6453 llio_transfer File is not supported(/vol0001/*) detail (file is not a global file).
-#llio_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/pretrain_gpt.py
-#/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/llm-jp-tokenizer
-#/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/megatron
-#/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/DeepSpeed
+DSF_HOME=/vol0503/data/hp230254/u10270/DeepSpeedFugaku
+llio_transfer ${DSF_HOME}/pretrain_gpt.py
+/home/system/tool/dir_transfer ${DSF_HOME}/llm-jp-tokenizer
+/home/system/tool/dir_transfer ${DSF_HOME}/megatron
+/home/system/tool/dir_transfer ${DSF_HOME}/DeepSpeed
 
 #echo "begin llio_transfer dataset idx" `date`
 #

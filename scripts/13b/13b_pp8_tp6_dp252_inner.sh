@@ -1,10 +1,11 @@
 #!/bin/bash -x
 
+echo `date` `hostfile`
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
 tar xf /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
 source /local/fcc/inst/venv/bin/activate
-cd /vol0001/hp230254/u10270/DeepSpeedFugaku_3
+cd /vol0503/data/hp230254/u10270/DeepSpeedFugaku
 
 # distributed setting
 # Change for multinode config
@@ -52,7 +53,7 @@ DATASET_PATH_LIST=(
 # DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
 
 # read from single volume
-DATASET_PATH=${DATASET_PATH_LIST[0]}
+DATASET_PATH=${DATASET_PATH_LIST[1]}
 
 # train data setting
 TRAIN_DATA_PATH=""
