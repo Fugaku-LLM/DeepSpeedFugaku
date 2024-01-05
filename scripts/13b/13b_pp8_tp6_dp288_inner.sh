@@ -50,10 +50,13 @@ DATASET_PATH_LIST=(
 )
 
 # read from multiple volumes
-#DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
+#TP_GROUP_IDX=$(( PMIX_RANK / TENSOR_MODEL_PARALLEL_SIZE ))
+#DATASET_PATH=${DATASET_PATH_LIST[$(( TP_GROUP_IDX % ${#DATASET_PATH_LIST[*]} ))]}
+
+DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
 
 # read from single volume
-DATASET_PATH=${DATASET_PATH_LIST[1]}
+#DATASET_PATH=${DATASET_PATH_LIST[1]}
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -141,15 +144,15 @@ MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
 PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
-#NoCAPipe=4
-#SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
-#if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
-#  echo "Cehckpoint-activation: off"
-#  CHECKPOINT_ACTIVATIONS=""
-#else
-#  echo "Cehckpoint-activation: on"
+NoCAPipe=1
+SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
+if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
+  echo "Cehckpoint-activation: off"
+  CHECKPOINT_ACTIVATIONS=""
+else
+  echo "Cehckpoint-activation: on"
   CHECKPOINT_ACTIVATIONS="--checkpoint-activations"
-#fi
+fi
 
 USE_CACHED_DATASET="--use-cached-dataset"
 
