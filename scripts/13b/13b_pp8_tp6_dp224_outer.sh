@@ -53,7 +53,7 @@ llio_transfer /vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100
 #/home/system/tool/dir_transfer /vol0001/hp230254/u10270/DeepSpeedFugaku_3/DeepSpeed
 
 # llio_transfer latest_checkpointed_iteration file
-llio_transfer /vol0003/hp190122/data/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp8_tp6/gbs2016_v21/latest_checkpointed_iteration.txt
+#llio_transfer /vol0003/hp190122/data/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp8_tp6/gbs2016_v21/latest_checkpointed_iteration.txt
 
 #echo "begin llio_transfer dataset idx" `date`
 #

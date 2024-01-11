@@ -46,7 +46,7 @@ llio_transfer ${DSF_HOME}/pretrain_gpt.py
 /home/system/tool/dir_transfer ${DSF_HOME}/DeepSpeed
 
 # llio_transfer latest_checkpointed_iteration file
-llio_transfer /vol0003/hp190122/data/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp8_tp6/gbs2016_v21/latest_checkpointed_iteration.txt
+#llio_transfer /vol0003/hp190122/data/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp8_tp6/gbs2016_v21/latest_checkpointed_iteration.txt
 
 #echo "begin llio_transfer dataset idx" `date`
 #
