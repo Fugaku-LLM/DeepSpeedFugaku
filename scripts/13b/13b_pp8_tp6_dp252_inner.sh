@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-echo `date` `hostfile`
+echo `date` `hostname`
 mkdir -p /local/fcc/pytorch
 cd /local/fcc
 tar xf /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
@@ -50,10 +50,10 @@ DATASET_PATH_LIST=(
 )
 
 # read from multiple volumes
-# DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
+DATASET_PATH=${DATASET_PATH_LIST[$(( PMIX_RANK % ${#DATASET_PATH_LIST[*]} ))]}
 
 # read from single volume
-DATASET_PATH=${DATASET_PATH_LIST[1]}
+#DATASET_PATH=${DATASET_PATH_LIST[0]}
 
 # train data setting
 TRAIN_DATA_PATH=""
@@ -141,17 +141,17 @@ MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
 PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
-#NoCAPipe=4
-#SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
-#if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
-#  echo "Cehckpoint-activation: off"
-#  CHECKPOINT_ACTIVATIONS=""
-#else
-#  echo "Cehckpoint-activation: on"
+NoCAPipe=1
+SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
+if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
+  echo "Cehckpoint-activation: off"
+  CHECKPOINT_ACTIVATIONS=""
+else
+  echo "Cehckpoint-activation: on"
   CHECKPOINT_ACTIVATIONS="--checkpoint-activations"
-#fi
+fi
 
-USE_CACHED_DATASET="" #"--use-cached-dataset"
+USE_CACHED_DATASET="--use-cached-dataset"
 
 export OMP_NUM_THREADS=48
 export LD_PRELOAD=$1

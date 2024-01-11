@@ -29,17 +29,10 @@ stdproc_name="jobs/${param_name}/output.%j/%m/%/1000r/stdproc"
 #LP="/local/fcc/inst/other/lib/libtcmalloc.so"
 LP="/local/fcc/inst/other/lib/libtcmalloc.so:/vol0503/share/hp230254/allreduce/my_mpi_allreduce_utofu_thresh100m_1214_noprint.so"
 
-#rm /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
-rm /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
-
-#llio_transfer /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
-llio_transfer /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
-
-#mpirun -n ${num_node} /home/u11890/work/rankmap/fjmpi_6d_to_3d.out /home/u11890/work/rankmap/hostfile_${hostfile_name} /home/u11890/work/rankmap/vcoordfile_${hostfile_name}_fj
-mpirun -n ${num_node} /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out /vol0503/share/hp230254/rankmap/hostfile_${hostfile_name} /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
-
-#llio_transfer --purge /home/u11890/work/rankmap/fjmpi_6d_to_3d.out
-llio_transfer --purge /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
+#rm /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
+#llio_transfer /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
+#mpirun -n ${num_node} /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out /vol0503/share/hp230254/rankmap/hostfile_${hostfile_name} /vol0503/share/hp230254/rankmap/vcoordfile_${hostfile_name}_fj
+#llio_transfer --purge /vol0503/share/hp230254/rankmap/fjmpi_6d_to_3d.out
 
 llio_transfer 13b_pp8_tp6_dp252_inner.sh
 llio_transfer /vol0005/mdt3/share/hp230254/pytorch/1703667164.202942381.fcc.pytorch.y.r1.13_for_a64fx.tar.gz
@@ -52,6 +45,9 @@ llio_transfer ${DSF_HOME}/pretrain_gpt.py
 /home/system/tool/dir_transfer ${DSF_HOME}/llm-jp-tokenizer
 /home/system/tool/dir_transfer ${DSF_HOME}/megatron
 /home/system/tool/dir_transfer ${DSF_HOME}/DeepSpeed
+
+# llio_transfer latest_checkpointed_iteration file
+llio_transfer /vol0003/hp190122/data/share/takumi/checkpoints/gpt-fugaku-dataset/code10K_en20K_ja30K.ver2.2/13b/pp8_tp6/gbs2016_v21/latest_checkpointed_iteration.txt
 
 #echo "begin llio_transfer dataset idx" `date`
 #
