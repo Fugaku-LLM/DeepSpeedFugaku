@@ -141,13 +141,13 @@ MODEL_PARALLEL_ARGS="--tensor-model-parallel-size $TENSOR_MODEL_PARALLEL_SIZE"
 DATA_PARALLEL_ARGS="--DDP-impl local"
 PARALLEL_ARGS="$MODEL_PARALLEL_ARGS $DATA_PARALLEL_ARGS $PIPELINE_PARALLEL_ARGS"
 
-NoCAPipe=1
+NoCAPipe=5
 SwitchRank=`expr ${PJM_NODE} \* \( ${PIPELINE_MODEL_PARALLEL_SIZE} - ${NoCAPipe} \) / ${PIPELINE_MODEL_PARALLEL_SIZE}`
 if [ ${PMIX_RANK} -ge ${SwitchRank} ]; then
-  echo "Cehckpoint-activation: off"
+  echo "Checkpoint-activation: off"
   CHECKPOINT_ACTIVATIONS=""
 else
-  echo "Cehckpoint-activation: on"
+  echo "Checkpoint-activation: on"
   CHECKPOINT_ACTIVATIONS="--checkpoint-activations"
 fi
 
@@ -201,7 +201,7 @@ numactl -m 4-7 -N 4-7 \
   --no-cuda \
   $CHECKPOINT_ACTIVATIONS \
   --use-cpu-initialization \
-  --num-workers 1 \
+  --num-workers 0 \
   $PARALLEL_ARGS \
   $TENSORBOARD_ARGS \
   --log-batch-size-to-tensorboard \
