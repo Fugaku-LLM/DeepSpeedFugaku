@@ -1,4 +1,0 @@
-sentencepiece<0.2.0
-protobuf<3.21.0
-tokenizers
-transformers
